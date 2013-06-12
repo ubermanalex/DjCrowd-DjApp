@@ -1,8 +1,44 @@
 '''
-Created on 21.05.2013
+Created on 12.06.2013
 
-@author: Max
+@author: Alex
 '''
+
+class SongDatabase(object):
+
+    def __init__(self):
+        self.database = []
+        
+    def addSong(self, interpret, songtitle, numberofvotes):
+        song = Song(interpret, songtitle, numberofvotes)
+        self.database.append(song)
+        
+    def getSongsByInterpret(self, interpret):
+        result = ''
+        for song in self.database:
+            if song.interpret == interpret:
+                result = result + song.toStrI() + '\n'
+        return interpret + ':\n' + result
+    
+    def getSongsByAlbum(self, album):
+        result = ''
+        for song in self.database:
+            if song.album == album: 
+                result = result + song.toStrA() + '\n'
+        return album +':\n' + result
+    
+
+class Song(object):
+    def __init__(self, interpret, songtitle, numberofvotes):
+        self.interpret = interpret
+        self.songtitle = songtitle
+        self.numberofvotes = numberofvotes
+        
+    def toStrI(self):
+        return '{self.title} aus dem Album {self.album}; Laenge: {self.length}'.format(self=self)
+    
+    def toStrA(self):
+        return 'Vom Interpreten {self.interpret} {self.title}; Laenge: {self.length}'.format(self=self)    
 
 from libavg import avg,AVGApp
 import sys,thread
@@ -50,8 +86,15 @@ class EchoServerProtocol(WebSocketServerProtocol):
               
     def onMessage(self, msg, binary):
         print "sending echo:", msg ##print incoming message
-        self.sendMessage("Received: "+msg, binary)##send back message to initiating client
-        
+        if (msg[0:10] == 'USERNAME: ')
+            userarray.append(msg)
+            self.sendMessage("USERNAME: "+msg, binary)##send back message to initiating client
+
+        if (msg[0:6] == 'SONG: ')
+            list = msg[7:msg.len()].split('##')
+            songdb.addSong(list[0],list[1],list[2])
+            self.sendMessage("SONG: "+msg, binary)##send back message to initiating client
+
         
 
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
@@ -81,4 +124,6 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
 if __name__ == '__main__':
     rcv=libAvgAppWithRect()
     ips=IPStorage()
+    songdb = SongDatabase()
+    userarray = []
     rcv.player.play()
