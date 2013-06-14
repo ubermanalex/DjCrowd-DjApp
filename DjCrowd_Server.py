@@ -3,7 +3,7 @@ Created on 12.06.2013
 
 @author: Alex
 '''
-
+import pdb
 import sys,thread
 from libavg import *
 #import listnode
@@ -15,7 +15,10 @@ from autobahn.websocket import WebSocketServerFactory, \
                                listenWS
 
 ##LISTNODE
-##TODO:Auslagern                               
+##TODO:Auslagern
+
+global rectext
+                               
 class ListNode(DivNode):
 
     def __init__ (self, slist, scount, **kwargs):
@@ -86,8 +89,9 @@ class ListNode(DivNode):
         
         self.node.append("")
         self.slist.append(elem)
-        
-        self.node[i] = WordsNode(id = str(i), text= str(elem), color="FFFFFF", pos=(5,self.p), parent=self.window)
+        #pdb.set_trace()
+        node =  WordsNode(id = str(i), text= str(elem), color="FFFFFF", pos=(5,self.p), parent=self.window)
+        self.node[i] = node
         self.node[i].setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
 
         self.p = self.p+20
@@ -248,13 +252,19 @@ class EchoServerProtocol(WebSocketServerProtocol):
         ##adds song
 
         if (msg[0:6] == 'SONG: '):
-            print ('test')
             oberegrenze = len(msg)
             songelems = msg[6:oberegrenze].split('##')
-            request = songelems[0]+" ## "+songelems[1]
+            request = songelems[0]+" ## "+songelems[1]+" ## "+songelems[2]
             print(request)
-            #requestlist.addEle(request)#TODO:FIX
-        
+            rectext = str(request)
+            rcv.player.setTimeout(0, lambda : requestlist.addEle(request))
+            #rcv.player.callFromThread(lambda : requestlist.addElm(request))
+            #print (dir(rcv.player.getTestHelper().fakeMouseEvent))
+            #rcv.player.getTestHelper().fakeMouseEvent(avg.CURSORDOWN, True, False, False, 89, 142, 1)
+            #requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")#TODO:FIX
+            #dsd = avg.Event(avg.CUSTOMEVENT,avg.CUSTOM)
+            #print dsd
+            
         ##applies vote
         
         if (msg[0:6] == 'VOTE: '):
@@ -268,7 +278,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
             for i in range(0,userdblen):
                 if (user == userdb[i].username):
                     if (userdb[i].numberofvotes == 0):
-                        return 0 ##TODO:BREAK SECOND LOOP##
+                        return 0
                     userdb[i].numberofvotes -= 1
                     print ('USERVOTES: '+str(userdb[i].numberofvotes))
                     break
@@ -291,13 +301,21 @@ class EchoServerProtocol(WebSocketServerProtocol):
             
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
+    def tests(self,events):
+        rcv.player.getTestHelper().fakeMouseEvent(avg.CURSORDOWN, True, False, False, 89, 142, 1)
+        print "LLLLLLLLLLLLLLLLLLL"
+    
     def click(self,events):
+            
+            #rcv.player.getTestHelper().fakeMouseEvent(avg.CURSORDOWN, True, False, False, 89, 142, 1)
             if (rcv.rectadd.color=="A4A4A4"):
                 return 0
             text = requestlist.removEle()
             eventid = (events.node.id)
             
             if eventid == "add":
+                requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")#TODO:FIX
+                #print(events.pos)
                 print('Hinzugefuegt: '+text)
                 newsong = text.split(' ## ')
                 songdb.addSong(newsong[0],newsong[1],0,newsong[2])
@@ -333,6 +351,9 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         self.divrej2 = avg.DivNode(id = "rej2",pos=(30,215),size=(250,30),parent=self.rootNode)
         self.divrej3 = avg.DivNode(id = "rej3",pos=(30,260),size=(250,30),parent=self.rootNode)
         
+        #self.customdiv = avg.DivNode(id = "customdiv",pos=(290,0),size=(310,20),parent=self.rootNode)
+        
+        #self.divrej3.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.tests)#TODO
         self.divadd.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej1.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej2.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
@@ -347,12 +368,13 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                       
     def initializeWebSocket(self):##Starts the WebSocket
         log.startLogging(sys.stdout)##Create a logfile (not necessary)
-        self.factory = WebSocketServerFactory("ws://localhost:9033", debug = False)
+        self.factory = WebSocketServerFactory("ws://localhost:9034", debug = False)
         self.factory.protocol = EchoServerProtocol ##assign our Protocol to send/receive Messages
         listenWS(self.factory)
-        reactor.run(installSignalHandlers=0)##"installSignalHandlers=0" Necessary for Multithreading
         
-           
+        reactor.run(installSignalHandlers=0)##"installSignalHandlers=0" Necessary for Multithreading
+
+             
          
 if __name__ == '__main__':
     rcv=libAvgAppWithRect()
@@ -361,4 +383,6 @@ if __name__ == '__main__':
     userdb = databases.UserDatabase()
     requestlist = ListNode(["Alligatoah ## Meine Band ## user1","Prinz Pi ## Kompass ohne Norden ## user1"], 2, size=(300, 100), pos=(5, 5), crop=True, elementoutlinecolor="333333", parent=rcv.player.getRootNode())
     requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")
+    requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")
     rcv.player.play()
+    print "FDSDFSDFSDFSDF"
