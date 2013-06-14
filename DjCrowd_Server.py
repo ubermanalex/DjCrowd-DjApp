@@ -14,10 +14,11 @@ from autobahn.websocket import WebSocketServerFactory, \
                                WebSocketServerProtocol, \
                                listenWS
 
+global hostip
+hostip = "ws://localhost:9034"
+
 ##LISTNODE
 ##TODO:Auslagern
-
-global rectext
                                
 class ListNode(DivNode):
 
@@ -219,9 +220,7 @@ class IPStorage():
 
 ###WEBSOCKETPROTOCOL USED FOR COMMUNICATION####
 class EchoServerProtocol(WebSocketServerProtocol):
-    
-    #TODO:Globale Variable
-    
+        
     def onClose(self,wasClean,code,reason):
         print "Client left"
         ips.dropConnection(self.peer.host) ##Drop Connection out of IPStorage when Client disconnects
@@ -230,13 +229,11 @@ class EchoServerProtocol(WebSocketServerProtocol):
     def onOpen(self):
         ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
         ips.updateAll("New Client with IP "+self.peer.host+" has joined")
-    
-    def send(self,msg):
-        self.sendMessage(msg)
-    
-    def onMessage(self, msg, binary):
-        print "sending echo:", msg ##print incoming message
         
+    def onMessage(self, msg, binary):
+        print "received:", msg ##print incoming message
+        if (msg[0:4] == 'BACK'):
+            self.sendMessage(msg[4:len(msg)], binary)##send back message to initiating client
         ##adds user
         
         if (msg[0:10] == 'USERNAME: '):
@@ -244,6 +241,10 @@ class EchoServerProtocol(WebSocketServerProtocol):
             userdb.addUser(userdb.getlen(),msg[10:oberegrenze],0,3)
             userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
                    'NAME: '+str(userdb[userdb.getlen()-1].username)+'\n'+
+                   'SONG1: '+str(userdb[userdb.getlen()-1].song1.interpret)+" - "+str(userdb[userdb.getlen()-1].song1.songtitle)+
+                   str(userdb[userdb.getlen()-1].song1.status)+'\n'+
+                   'SONG2: '+str(userdb[userdb.getlen()-1].song2.interpret)+" - "+str(userdb[userdb.getlen()-1].song2.songtitle)+
+                   str(userdb[userdb.getlen()-1].song2.status)+'\n'+
                    'POINTS: '+str(userdb[userdb.getlen()-1].numberofpoints)+'\n'+
                    'VOTES: '+str(userdb[userdb.getlen()-1].numberofvotes))
             self.sendMessage(userstr, binary)##send back message to initiating client
@@ -254,16 +255,37 @@ class EchoServerProtocol(WebSocketServerProtocol):
         if (msg[0:6] == 'SONG: '):
             oberegrenze = len(msg)
             songelems = msg[6:oberegrenze].split('##')
-            request = songelems[0]+" ## "+songelems[1]+" ## "+songelems[2]
-            print(request)
-            rectext = str(request)
-            rcv.player.setTimeout(0, lambda : requestlist.addEle(request))
-            #rcv.player.callFromThread(lambda : requestlist.addElm(request))
-            #print (dir(rcv.player.getTestHelper().fakeMouseEvent))
-            #rcv.player.getTestHelper().fakeMouseEvent(avg.CURSORDOWN, True, False, False, 89, 142, 1)
-            #requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")#TODO:FIX
-            #dsd = avg.Event(avg.CUSTOMEVENT,avg.CUSTOM)
-            #print dsd
+            interpret = songelems[0]
+            songtitle = songelems[1]
+            
+            for userobj in userdb:
+                if (userobj.username == songelems[2]):
+                    print userobj.userid
+                    if (userobj.song1.interpret == "LE##ER"):
+                        print ("CHANGE s1")
+                        userobj.song1.interpret = interpret
+                        userobj.song1.songtitle = songtitle
+                        userobj.song1.status = 0
+                    elif (userobj.song2.interpret == "LE##ER"):
+                        userobj.song2.interpret = interpret
+                        userobj.song2.songtitle = songtitle
+                        userobj.song2.status = 0
+                        print ("CHANGE s1")
+                    else:
+                        return 0
+
+            userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
+                   'NAME: '+str(userdb[userdb.getlen()-1].username)+'\n'+
+                   'SONG1: '+str(userdb[userdb.getlen()-1].song1.interpret)+" - "+str(userdb[userdb.getlen()-1].song1.songtitle)+
+                   str(userdb[userdb.getlen()-1].song1.status)+'\n'+
+                   'SONG2: '+str(userdb[userdb.getlen()-1].song2.interpret)+" - "+str(userdb[userdb.getlen()-1].song2.songtitle)+
+                   str(userdb[userdb.getlen()-1].song2.status)+'\n'+
+                   'POINTS: '+str(userdb[userdb.getlen()-1].numberofpoints)+'\n'+
+                   'VOTES: '+str(userdb[userdb.getlen()-1].numberofvotes))
+            print(userstr)
+            
+
+            rcv.player.setTimeout(0, lambda : requestlist.addEle(interpret+" ~~~ "+songtitle))
             
         ##applies vote
         
@@ -300,30 +322,49 @@ class EchoServerProtocol(WebSocketServerProtocol):
 
             
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
-    
-    def tests(self,events):
-        rcv.player.getTestHelper().fakeMouseEvent(avg.CURSORDOWN, True, False, False, 89, 142, 1)
-        print "LLLLLLLLLLLLLLLLLLL"
-    
+        
     def click(self,events):
             
-            #rcv.player.getTestHelper().fakeMouseEvent(avg.CURSORDOWN, True, False, False, 89, 142, 1)
             if (rcv.rectadd.color=="A4A4A4"):
                 return 0
             text = requestlist.removEle()
             eventid = (events.node.id)
             
             if eventid == "add":
-                requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")#TODO:FIX
-                #print(events.pos)
                 print('Hinzugefuegt: '+text)
-                newsong = text.split(' ## ')
-                songdb.addSong(newsong[0],newsong[1],0,newsong[2])
-                print('Interpret: '+str(songdb[0].interpret)+'\n'+
-                      'Songtitel: '+str(songdb[0].songtitle)+'\n'+
-                      'Voteanzahl: '+str(songdb[0].numberofvotes)+'\n'+
-                      'Von User: '+str(songdb[0].fromuser))
-                #TODO:rcv.factory.protocol.send('REQANS: Song hinzugefuegt.')
+                newsong = text.split(' ~~~ ')
+                interpret = newsong[0]
+                songtitle = newsong[1]
+                user = userdb.getUser(interpret,songtitle)
+                
+                if (user.song1.status == 0):
+                    user.song1.interpret = interpret
+                    user.song1.songtitle = songtitle
+                    user.song1.status = 1
+                elif (user.song2.status == 0):
+                    user.song2.interpret = interpret
+                    user.song2.songtitle = songtitle
+                    user.song2.status = 1
+                else:
+                    return 0
+                
+                userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
+                   'NAME: '+str(userdb[userdb.getlen()-1].username)+'\n'+
+                   'SONG1: '+str(userdb[userdb.getlen()-1].song1.interpret)+" - "+str(userdb[userdb.getlen()-1].song1.songtitle)+
+                   str(userdb[userdb.getlen()-1].song1.status)+'\n'+
+                   'SONG2: '+str(userdb[userdb.getlen()-1].song2.interpret)+" - "+str(userdb[userdb.getlen()-1].song2.songtitle)+
+                   str(userdb[userdb.getlen()-1].song2.status)+'\n'+
+                   'POINTS: '+str(userdb[userdb.getlen()-1].numberofpoints)+'\n'+
+                   'VOTES: '+str(userdb[userdb.getlen()-1].numberofvotes))
+                print(userstr)
+            
+                
+                songdb.addSong(interpret,songtitle,0,user.userid)
+                print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
+                      'Songtitel: '+str(songdb[songdb.getlen()-1].songtitle)+'\n'+
+                      'Voteanzahl: '+str(songdb[songdb.getlen()-1].numberofvotes)+'\n'+
+                      'Von User: '+str(songdb[songdb.getlen()-1].fromuser))
+                #rcv.factory.protocol.sendMessage("REQANS: Song hinzugefuegt.",False)
             elif eventid == "rej1":
                 print('Abgelehnt (doppelt): '+text)
                 #TODO:rcv.factory.protocol.send('REQANS: Song bereits in Crowdlist.')
@@ -351,9 +392,6 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         self.divrej2 = avg.DivNode(id = "rej2",pos=(30,215),size=(250,30),parent=self.rootNode)
         self.divrej3 = avg.DivNode(id = "rej3",pos=(30,260),size=(250,30),parent=self.rootNode)
         
-        #self.customdiv = avg.DivNode(id = "customdiv",pos=(290,0),size=(310,20),parent=self.rootNode)
-        
-        #self.divrej3.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.tests)#TODO
         self.divadd.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej1.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej2.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
@@ -368,7 +406,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                       
     def initializeWebSocket(self):##Starts the WebSocket
         log.startLogging(sys.stdout)##Create a logfile (not necessary)
-        self.factory = WebSocketServerFactory("ws://localhost:9034", debug = False)
+        self.factory = WebSocketServerFactory(hostip, debug = False)
         self.factory.protocol = EchoServerProtocol ##assign our Protocol to send/receive Messages
         listenWS(self.factory)
         
@@ -381,8 +419,5 @@ if __name__ == '__main__':
     ips=IPStorage()
     songdb = databases.SongDatabase()
     userdb = databases.UserDatabase()
-    requestlist = ListNode(["Alligatoah ## Meine Band ## user1","Prinz Pi ## Kompass ohne Norden ## user1"], 2, size=(300, 100), pos=(5, 5), crop=True, elementoutlinecolor="333333", parent=rcv.player.getRootNode())
-    requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")
-    requestlist.addEle("Trailerpark ## Schlechter Tag ## user1")
+    requestlist = ListNode([], 2, size=(300, 100), pos=(5, 5), crop=True, elementoutlinecolor="333333", parent=rcv.player.getRootNode())
     rcv.player.play()
-    print "FDSDFSDFSDFSDF"
