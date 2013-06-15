@@ -20,6 +20,7 @@ hostip = "ws://localhost:9034"
 ##LISTNODE
 ##TODO:Auslagern
 ##TODO:Timer
+##TODO:Dj kann Lied editieren, wenn er es annimmt (Typos beheben etc)
                                
 class ListNode(DivNode):
 
@@ -77,14 +78,17 @@ class ListNode(DivNode):
                 rcv.rectrej1.color="FE9A2E"
                 rcv.rectrej2.color="FE642E"
                 rcv.rectrej3.color="FE2E2E"
+                rcv.rectblockuser.color="FF0000"
                 rcv.rectadd.fillcolor="58FA58"
                 rcv.rectrej1.fillcolor="FAAC58"
                 rcv.rectrej2.fillcolor="FA8258"
                 rcv.rectrej3.fillcolor="FA5858"
+                rcv.rectblockuser.fillcolor="FE2E2E"
                 rcv.textadd.color="088A08"
                 rcv.textrej1.color="8A4B08"
                 rcv.textrej2.color="8A2908"
                 rcv.textrej3.color="8A0808"
+                rcv.textblockuser.color="8A0808"
                 
             elif (int(event.node.id) == 5000):
                 if len(songdb.topseven) == 0:
@@ -161,14 +165,17 @@ class ListNode(DivNode):
         rcv.rectrej1.color="A4A4A4"
         rcv.rectrej2.color="A4A4A4"
         rcv.rectrej3.color="A4A4A4"
+        rcv.rectblockuser.color="A4A4A4"
         rcv.rectadd.fillcolor="BDBDBD"
         rcv.rectrej1.fillcolor="BDBDBD"
         rcv.rectrej2.fillcolor="BDBDBD"
         rcv.rectrej3.fillcolor="BDBDBD"
+        rcv.rectblockuser.fillcolor="BDBDBD"
         rcv.textadd.color="424242"
         rcv.textrej1.color="424242"
         rcv.textrej2.color="424242"
         rcv.textrej3.color="424242"
+        rcv.textblockuser.color="424242"
         
         self.current_event = None
         if len(self.slist) == 0:
@@ -342,7 +349,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
             
             
             #check if song already in songdb or requestlist
-            for song in songdb:
+            for song in songdb.database:
                 interp = song.interpret.upper()
                 songtit = song.songtitle.upper()
                 if interp == testinterpret and testsongtitle == songtit:
@@ -441,6 +448,19 @@ class EchoServerProtocol(WebSocketServerProtocol):
 
             
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
+        
+    def click3(self,events):
+            text = requestlist.removEle()
+            newsong = text.split(' / ')
+            interpret = newsong[0]
+            songtitle = newsong[1]
+            user = userdb.getUser(interpret,songtitle)
+            print user.username, "blockiert."
+            user.song1.interpret = "BLO##CKED"
+            user.song1.songtitle = "BLO##CKED"
+            user.song2.interpret = "BLO##CKED"
+            user.song2.songtitle = "BLO##CKED"
+                
         
     def click2(self,events):    
             if (rcv.rectsongplayed.color=="A4A4A4"):
@@ -568,28 +588,33 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
     def __init__(self): ##Create one WordsNode for the Text and RectNode to send to a certain Client and set player, canvas,..
         self.player=avg.Player.get()
-        self.canvas=self.player.createMainCanvas(size=(620,310))
+        self.canvas=self.player.createMainCanvas(size=(620,350))
         self.rootNode=self.canvas.getRootNode()
 
         self.rectadd = avg.RectNode(size=(250,30),pos=(30,125),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
         self.rectrej1 = avg.RectNode(size=(250,30),pos=(30,170),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
         self.rectrej2 = avg.RectNode(size=(250,30),pos=(30,215),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
         self.rectrej3 = avg.RectNode(size=(250,30),pos=(30,260),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
+        self.rectblockuser = avg.RectNode(size=(250,30),pos=(30,305),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
 
         self.divadd = avg.DivNode(id = "add",pos=(30,125),size=(250,30),parent=self.rootNode)
         self.divrej1 = avg.DivNode(id = "rej1",pos=(30,170),size=(250,30),parent=self.rootNode)
         self.divrej2 = avg.DivNode(id = "rej2",pos=(30,215),size=(250,30),parent=self.rootNode)
         self.divrej3 = avg.DivNode(id = "rej3",pos=(30,260),size=(250,30),parent=self.rootNode)
+        self.divblockuser = avg.DivNode(id = "blockuser",pos=(30,305),size=(250,30),parent=self.rootNode)
         
         self.divadd.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej1.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej2.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej3.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
+        self.divblockuser.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click3)
         
         self.textadd =avg.WordsNode(pos=(10,5),parent=self.divadd,color="424242",text="Vorschlag annehmen")
         self.textrej1 = avg.WordsNode(pos=(10,5),parent=self.divrej1,color="424242",text="Doppelt")
         self.textrej2 = avg.WordsNode(pos=(10,5),parent=self.divrej2,color="424242",text="Nicht vorhanden")
         self.textrej3 = avg.WordsNode(pos=(10,5),parent=self.divrej3,color="424242",text="Passt nicht")
+        self.textblockuser = avg.WordsNode(pos=(10,5),parent=self.divblockuser,color="424242",text="User blockieren")
+
 
         self.divsongplayed = avg.DivNode(id = "songplayed",pos=(340,170),size=(250,30),parent=self.rootNode)
         self.rectsongplayed = avg.RectNode(size=(250,30),pos=(0,0),parent=self.divsongplayed,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
