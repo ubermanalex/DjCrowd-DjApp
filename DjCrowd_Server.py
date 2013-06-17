@@ -7,7 +7,7 @@ import pdb
 import sys,thread
 from libavg import *
 #import listnode
-import databases  
+import databases
 from twisted.internet import reactor
 from twisted.python import log
 from autobahn.websocket import WebSocketServerFactory, \
@@ -321,10 +321,10 @@ class EchoServerProtocol(WebSocketServerProtocol):
             usern = msg[10:oberegrenze]
             for user in userdb:
                 if user.username.upper() == usern.upper():
-                    self.sendMessage('ALREADYINUSE')
+                    self.sendMessage('NAMUSED')
                     return 0
-            self.sendMessage('USERNAMEFREE')
-            userdb.addUser(userdb.getlen(),msg[10:oberegrenze],0,3)
+            self.sendMessage('NAMFREE')
+            userdb.addUser(userdb.getlen(),self.peer.host,msg[10:oberegrenze],0,3)
             #userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
             #       'NAME: '+str(userdb[userdb.getlen()-1].username)+'\n'+
             #       'SONG1: '+str(userdb[userdb.getlen()-1].song1.interpret)+" - "+str(userdb[userdb.getlen()-1].song1.songtitle)+
@@ -353,7 +353,8 @@ class EchoServerProtocol(WebSocketServerProtocol):
                 interp = song.interpret.upper()
                 songtit = song.songtitle.upper()
                 if interp == testinterpret and testsongtitle == songtit:
-                    #TODO:send: Der Song ist bereits in der Crowdlist
+                    push = "SONGIND"+song.interpret+" - "+song.songtitle
+                    self.sendMessage(str(push))
                     return 0
                 
             for song in requestlist.slist:
@@ -361,7 +362,8 @@ class EchoServerProtocol(WebSocketServerProtocol):
                 interp = intandtit[0].upper()
                 songtit = intandtit[1].upper()
                 if interp == testinterpret and testsongtitle == songtit:
-                    #TODO:send: Der Song wird vom DJ bearbeitet
+                    push = "SONGINP"+intandtit[0]+" - "+intandtit[1]
+                    self.sendMessage(str(push))
                     return 0
             
             for userobj in userdb:
@@ -378,7 +380,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
                         userobj.song2.status = 0
                         #print ("CHANGE s2")
                     else:
-                        #TODO:send: Du kannst maximal zwei Songs hinzufuegen/ vorschlagen
+                        self.sendMessage('MAXSONG')
                         return 0
 
             #userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
@@ -409,7 +411,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
             for i in range(0,userdblen):
                 if (user == userdb[i].username):
                     if (userdb[i].numberofvotes == 0):
-                        #TODO:send: Du hast momentan keine Votes
+                        self.sendMessage('MAXVOTE')
                         return 0
                     userdb[i].numberofvotes -= 1
                     userdb[i].votedfor.append(interpret+'##'+songtitle)
@@ -448,8 +450,19 @@ class EchoServerProtocol(WebSocketServerProtocol):
 
             
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
-        
-    def click3(self,events):
+    
+    def confirm2(self):
+        print "yo"
+        check = raw_input("Zur Bestaetigung DjCrowd eingeben")
+        if check != 'DjCrowd':
+            return 5
+        return 10
+    
+    def confirm(self, check):
+            #check = raw_input("Zum Bestaetigen DjCrowd eingeben:")
+            if check != 500:
+                print "yo"
+                return 0
             text = requestlist.removEle()
             newsong = text.split(' / ')
             interpret = newsong[0]
@@ -460,14 +473,41 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             user.song1.songtitle = "BLO##CKED"
             user.song2.interpret = "BLO##CKED"
             user.song2.songtitle = "BLO##CKED"
+        
+            
+    def click3(self,events):
+            #thread.start_new_thread(self.confirm,(500,))
+            #return 0
+            if (rcv.rectadd.color=="A4A4A4"):
+                return 0
+            text = requestlist.removEle()
+            newsong = text.split(' / ')
+            interpret = newsong[0]
+            songtitle = newsong[1]
+            user = userdb.getUser(interpret,songtitle)
+            receiver = user.userip
+            print user.username, "blockiert."
+            #TODO:PUNKTE LÖSCHEN??
+            user.song1.interpret = "BLO##CKED"
+            user.song1.songtitle = "BLO##CKED"
+            user.song2.interpret = "BLO##CKED"
+            user.song2.songtitle = "BLO##CKED"
+            push = "SONGBLO"+interpret+" - "+songtitle
+            ips.getConnectionForIp(receiver).sendMessage(str(push))
                 
         
     def click2(self,events):    
             if (rcv.rectsongplayed.color=="A4A4A4"):
                 return 0
+            #self.x = 0
+            #self.x = thread.start_new_thread(self.confirm2,())
             #TODO:Validierung, bei 'Song gespielt'-Klick
             #check = raw_input("Bestaetige mit 'DjCrowd'")
             #if check != "DjCrowd":
+            #    return 0
+            #while self.x == 0:
+            #    pass
+            #if self.x == 5:
             #    return 0
             interpret = songdb[0].interpret
             songtitle = songdb[0].songtitle
@@ -493,19 +533,22 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     
             for user in userdb:
                 print user.username, user.numberofpoints
+            
     def click(self,events):
             
             if (rcv.rectadd.color=="A4A4A4"):
                 return 0
             text = requestlist.removEle()
             eventid = (events.node.id)
-            
+            newsong = text.split(' / ')
+            interpret = newsong[0]
+            songtitle = newsong[1]
+            user = userdb.getUser(interpret,songtitle)
+            receiver = user.userip
+                
             if eventid == "add":
                 print('Hinzugefuegt: '+text)
                 newsong = text.split(' / ')
-                interpret = newsong[0]
-                songtitle = newsong[1]
-                user = userdb.getUser(interpret,songtitle)
                 
                 if (user.song1.status == 0 and user.song1.interpret == interpret and user.song1.songtitle == songtitle):
                     user.song1.interpret = interpret
@@ -534,14 +577,13 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 songdb.addSong(interpret,songtitle,0,user.userid)
                 if (songdb.checktopseven(topsevenold)):
                     topseven.update(songdb.tolist(songdb.topseven),5000)
-                    
+                push = "SONGADD"+interpret+" - "+songtitle
+                ips.getConnectionForIp(receiver).sendMessage(str(push))
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
                 #      'Songtitel: '+str(songdb[songdb.getlen()-1].songtitle)+'\n'+
                 #      'Voteanzahl: '+str(songdb[songdb.getlen()-1].numberofvotes)+'\n'+
                 #      'Von User: '+str(songdb[songdb.getlen()-1].fromuser))
                 
-                #TODO:Antwort an Ursprungsclient schicken
-                #rcv.factory.protocol.sendMessage("REQANS: Song hinzugefuegt.",False)
             elif eventid == "rej1":
                 print('Abgelehnt (doppelt): '+text)
                 usersong = text.split(' / ')
@@ -553,12 +595,11 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     userrej.song2.interpret = 'LE##ER'
                     userrej.song2.songtitle = 'LE##ER'
     
-                #TODO:Antwort an Ursprungsclient schicken
-                #rcv.factory.protocol.send('REQANS: Song bereits in Crowdlist.')
+                push = "SONGRE1"+interpret+" - "+songtitle
+                ips.getConnectionForIp(receiver).sendMessage(str(push))
+                
             elif eventid == "rej2":
                 print('Abgelehnt (nicht vorh.): '+text)
-                #TODO:Antwort an Ursprungsclient schicken
-                #rcv.factory.protocol.send('REQANS: Song nicht vorhanden.')
                 usersong = text.split(' / ')
                 userrej = userdb.getUser(usersong[0],usersong[1])
                 if userrej.song1.interpret == usersong[0] and userrej.song1.songtitle == usersong[1] and userrej.song1.status == 0:
@@ -568,14 +609,17 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     userrej.song2.interpret = 'LE##ER'
                     userrej.song2.songtitle = 'LE##ER'
                 print user
+
+                push = "SONGRE2"+interpret+" - "+songtitle
+                ips.getConnectionForIp(receiver).sendMessage(str(push))
+
+            
             elif eventid == "rej3":
                 print('Abgelehnt (unpassend): '+text)
                 usersong = text.split(' / ')
                 userrej = userdb.getUser(usersong[0],usersong[1])
                 print userrej.song1.interpret, userrej.song1.songtitle
                 print userrej.song2.interpret, userrej.song2.songtitle
-                #TODO:Antwort an Ursprungsclient schicken
-                #rcv.factory.protocol.send('REQANS: Song passt heute nicht.')
                 if userrej.song1.interpret == usersong[0] and userrej.song1.songtitle == usersong[1] and userrej.song1.status == 0:
                     userrej.song1.interpret = 'LE##ER'
                     userrej.song1.songtitle = 'LE##ER'
@@ -584,6 +628,9 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     userrej.song2.songtitle = 'LE##ER'
                 print userrej.song1.interpret, userrej.song1.songtitle
                 print userrej.song2.interpret, userrej.song2.songtitle
+                
+                push = "SONGRE3"+interpret+" - "+songtitle
+                ips.getConnectionForIp(receiver).sendMessage(str(push))
                 
     
     def __init__(self): ##Create one WordsNode for the Text and RectNode to send to a certain Client and set player, canvas,..
