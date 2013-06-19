@@ -5,6 +5,7 @@ Created on 12.06.2013
 '''
 import pdb
 import sys,thread
+import time
 from libavg import *
 #import listnode
 import databases
@@ -14,14 +15,16 @@ from autobahn.websocket import WebSocketServerFactory, \
                                WebSocketServerProtocol, \
                                listenWS
 
-global hostip
+global hostip, pysend
 hostip = "ws://localhost:9034"
 
 ##LISTNODE
 ##TODO:Auslagern
 ##TODO:Timer
 ##TODO:Dj kann Lied editieren, wenn er es annimmt (Typos beheben etc)
-                               
+##TODO:Checken, ob IP schon Nutzername hat
+##TODO:Keine doppelten IPs, nach connect schauen, ob userip in userdb
+                  
 class ListNode(DivNode):
 
     def __init__ (self, idindex, slist, scount, **kwargs):
@@ -50,6 +53,7 @@ class ListNode(DivNode):
             
         self.captureHolder = None
         self.dragOffsetY = 0
+        self.dragOffsetX = 0
         self.setEventHandler(avg.CURSORDOWN, avg.MOUSE | avg.TOUCH, self.startScroll)
         self.setEventHandler(avg.CURSORMOTION, avg.MOUSE | avg.TOUCH, self.doScroll)
         self.setEventHandler(avg.CURSORUP, avg.MOUSE | avg.TOUCH, self.endScroll)
@@ -90,19 +94,19 @@ class ListNode(DivNode):
                 rcv.textrej3.color="8A0808"
                 rcv.textblockuser.color="8A0808"
                 
-            elif (int(event.node.id) == 5000):
-                if len(songdb.topseven) == 0:
-                    return 0
-                
-                event.node.color = "FF0000"
-                
-                rcv.rectsongplayed.fillcolor="FE2E2E"
-                rcv.rectsongplayed.color="FF0000"
-                rcv.textsongplayed.color="8A0808"
-            else:
-                rcv.rectsongplayed.fillcolor="BDBDBD"
-                rcv.rectsongplayed.color="A4A4A4"
-                rcv.textsongplayed.color="424242"
+#             elif (int(event.node.id) == 5000):
+#                 if len(songdb.topseven) == 0:
+#                     return 0
+#                 
+#                 event.node.color = "FF0000"
+#                 
+#                 rcv.rectsongplayed.fillcolor="FE2E2E"
+#                 rcv.rectsongplayed.color="FF0000"
+#                 rcv.textsongplayed.color="8A0808"
+#             else:
+#                 rcv.rectsongplayed.fillcolor="BDBDBD"
+#                 rcv.rectsongplayed.color="A4A4A4"
+#                 rcv.textsongplayed.color="424242"
         
         else:
             pass
@@ -242,6 +246,8 @@ class ListNode(DivNode):
         if self.captureHolder is None:
             self.captureHolder = event.cursorid
             self.dragOffsetY = self.window.pos.y - event.pos.y
+            #TODO: horizontal scrollbar
+            self.dragOffsetX = self.window.pos.x - event.pos.x
     
     
     
@@ -249,6 +255,10 @@ class ListNode(DivNode):
         if self.window.size.y > event.node.size.y:
             if event.cursorid == self.captureHolder:
                 self.window.pos = avg.Point2D(self.window.pos.x, event.pos.y + self.dragOffsetY)
+        #TODO: horizontal scrollbar
+        if self.window.size.x > event.node.size.x:
+            if event.cursorid == self.captureHolder:
+                self.window.pos = avg.Point2D(event.pos.x + self.dragOffsetX, self.window.pos.y)
     
     
                 
@@ -317,14 +327,14 @@ class EchoServerProtocol(WebSocketServerProtocol):
         ##adds user
         
         if (msg[0:10] == 'USERNAME: '):
-            oberegrenze = len(msg)
-            usern = msg[10:oberegrenze]
+            msglen = len(msg)
+            usern = msg[10:msglen]
             for user in userdb:
                 if user.username.upper() == usern.upper():
                     self.sendMessage('NAMUSED')
                     return 0
             self.sendMessage('NAMFREE')
-            userdb.addUser(userdb.getlen(),self.peer.host,msg[10:oberegrenze],0,3)
+            userdb.addUser(userdb.getlen(),self.peer.host,msg[10:msglen],0,3)
             #userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
             #       'NAME: '+str(userdb[userdb.getlen()-1].username)+'\n'+
             #       'SONG1: '+str(userdb[userdb.getlen()-1].song1.interpret)+" - "+str(userdb[userdb.getlen()-1].song1.songtitle)+
@@ -339,8 +349,8 @@ class EchoServerProtocol(WebSocketServerProtocol):
         ##adds song
 
         if (msg[0:6] == 'SONG: '):
-            oberegrenze = len(msg)
-            songelems = msg[6:oberegrenze].split('##')
+            msglen = len(msg)
+            songelems = msg[6:msglen].split('##')
             interpret = songelems[0]
             songtitle = songelems[1]
             
@@ -363,6 +373,14 @@ class EchoServerProtocol(WebSocketServerProtocol):
                 songtit = intandtit[1].upper()
                 if interp == testinterpret and testsongtitle == songtit:
                     push = "SONGINP"+intandtit[0]+" - "+intandtit[1]
+                    self.sendMessage(str(push))
+                    return 0
+            
+            for song in rejdb.database:
+                interp = song.interpret.upper()
+                songtit = song.songtitle.upper()
+                if interp == testinterpret and testsongtitle == songtit:
+                    push = "SONGINR"+song.interpret+" - "+song.songtitle
                     self.sendMessage(str(push))
                     return 0
             
@@ -399,8 +417,8 @@ class EchoServerProtocol(WebSocketServerProtocol):
         ##applies vote
         
         if (msg[0:6] == 'VOTE: '):
-            oberegrenze = len(msg)
-            userandsong = msg[6:oberegrenze].split('##')
+            msglen = len(msg)
+            userandsong = msg[6:msglen].split('##')
             user = userandsong[0]
             interpret = userandsong[1]
             songtitle = userandsong[2]
@@ -413,6 +431,13 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     if (userdb[i].numberofvotes == 0):
                         self.sendMessage('MAXVOTE')
                         return 0
+                    x = True
+                    for song in songdb:
+                        if song.interpret == interpret and song.songtitle == songtitle:
+                            x = False
+                            break
+                    if x:
+                        return 0
                     userdb[i].numberofvotes -= 1
                     userdb[i].votedfor.append(interpret+'##'+songtitle)
                     #print ('USERVOTES: '+str(userdb[i].numberofvotes))
@@ -421,28 +446,36 @@ class EchoServerProtocol(WebSocketServerProtocol):
                 if (songtitle == songdb[i].songtitle and interpret == songdb[i].interpret):
                     songdb[i].numberofvotes += 1
                     j = i-1
+                    k = i
                     while j>=0: ##sorts songarray!
-                        if (songdb[i].numberofvotes <= songdb[j].numberofvotes):
+                        if (songdb[k].numberofvotes <= songdb[j].numberofvotes):
                             break
-
-                        songdb[j].interpret,songdb[i].interpret = songdb[i].interpret,songdb[j].interpret
-                        songdb[j].songtitle,songdb[i].songtitle = songdb[i].songtitle,songdb[j].songtitle
-                        songdb[j].numberofvotes,songdb[i].numberofvotes = songdb[i].numberofvotes,songdb[j].numberofvotes
-                        songdb[j].fromuser,songdb[i].fromuser = songdb[i].fromuser,songdb[j].fromuser
-
+                        songdb[j].interpret,songdb[k].interpret = songdb[k].interpret,songdb[j].interpret
+                        songdb[j].songtitle,songdb[k].songtitle = songdb[k].songtitle,songdb[j].songtitle
+                        songdb[j].numberofvotes,songdb[k].numberofvotes = songdb[k].numberofvotes,songdb[j].numberofvotes
+                        songdb[j].fromuser,songdb[k].fromuser = songdb[k].fromuser,songdb[j].fromuser
+                        
                         j -= 1
+                        k -= 1
                     break
                 
             #TODO: Neue SongDB an alle Clients schicken
-            
-            topsevenold = []
-            for song in topsevenold:
-                topsevenold.append(song)
-            if (songdb.checktopseven(topsevenold)):
-                    #TODO:songdb.topseven an Python-Client schicken
-                    topseven.update(songdb.tolist(songdb.topseven),5000)
-                
-                
+                    
+            topseven.update(songdb.tolist(songdb.topseven),5000)
+            x = songdb.tolist(songdb.topseven)
+                    
+            global pysend
+            pysend = ""
+            for y in x:
+                a = y.split(' / ')
+                if len(a)==1:
+                    pysend+=' ## ## !#!'
+                else:
+                    pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
+                        
+            pysend = pysend[0:len(pysend)-3]
+                       
+            print pysend
             #print('Interpret: '+str(songdb[0].interpret)+'\n'+
             #      'Songtitel: '+str(songdb[0].songtitle)+'\n'+
             #      'Voteanzahl: '+str(songdb[0].numberofvotes)+'\n'+
@@ -451,6 +484,22 @@ class EchoServerProtocol(WebSocketServerProtocol):
             
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
+    def sendtopy(self):
+        time.sleep(30)  #updates top7 on screen every 30sec
+        print "XXXXWDWQFWEGWE"
+        global pysend
+        print pysend
+        #TODO:Sendtoclient
+        self.sendtopy()
+            
+    def clickstart(self,events):
+        thread.start_new_thread(self.countdown,(0,2))
+        #TODO:send topseven, top3, startsignal
+        rcv.divstart.removeChild(self.textstart)
+        rcv.divstart.removeChild(self.rectstart)
+        rcv.rootNode.removeChild(self.divstart)
+        thread.start_new_thread(self.sendtopy,())
+        
     def confirm2(self):
         print "yo"
         check = raw_input("Zur Bestaetigung DjCrowd eingeben")
@@ -487,7 +536,6 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             user = userdb.getUser(interpret,songtitle)
             receiver = user.userip
             print user.username, "blockiert."
-            #TODO:PUNKTE LÖSCHEN??
             user.song1.interpret = "BLO##CKED"
             user.song1.songtitle = "BLO##CKED"
             user.song2.interpret = "BLO##CKED"
@@ -496,8 +544,15 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             ips.getConnectionForIp(receiver).sendMessage(str(push))
                 
         
-    def click2(self,events):    
+    def click2(self,events):
+            print songdb.tolist(songdb.topseven)
+                
             if (rcv.rectsongplayed.color=="A4A4A4"):
+                return 0
+            if songdb.getlen() == 0:
+                rcv.rectsongplayed.fillcolor="BDBDBD"
+                rcv.rectsongplayed.color="A4A4A4"
+                rcv.textsongplayed.color="424242"
                 return 0
             #self.x = 0
             #self.x = thread.start_new_thread(self.confirm2,())
@@ -509,30 +564,95 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             #    pass
             #if self.x == 5:
             #    return 0
-            interpret = songdb[0].interpret
-            songtitle = songdb[0].songtitle
-            numberofvotes = songdb[0].numberofvotes
-            fromuser = songdb[0].fromuser
-            song = interpret+'##'+songtitle
+            top3 = []
+            i = 0
+            if songdb.getlen() < 3:
+                k = songdb.getlen()
+            else:
+                k = 3
+            while i < k:
+                songele = []
+                interpret = songdb[i].interpret
+                songtitle = songdb[i].songtitle
+                numberofvotes = songdb[i].numberofvotes
+                fromuser = songdb[i].fromuser
+                song = interpret+'##'+songtitle
+                songele.append(interpret)
+                songele.append(songtitle)
+                songele.append(numberofvotes)
+                songele.append(fromuser)
+                songele.append(song)
+                top3.append(songele)
+                i+=1
+                
+            i = 0
             
-            songdb.topseven.remove(songdb[0])
-            songdb.database.remove(songdb[0])
-            songdb.addSong(interpret,songtitle,0,fromuser)
-            topseven.update(songdb.tolist(songdb.topseven),5000)    
+            pointgrow = []
             
-            for user in userdb:
-                if fromuser == user.userid:
-                    user.numberofpoints += numberofvotes * 10
-                while True:
+            while i < k:
+                songdb.database.remove(songdb[0])
+                songdb.addSong(top3[i][0],top3[i][1],0,top3[i][3])
+
+                for user in userdb:
+                    print user.username
+                    if top3[i][3] == user.userid:
+                        c = top3[i][2] * 10
+                        user.numberofpoints += c
+                        z = True
+                        for x in pointgrow:
+                            if x[0] == user.userip and x[2] == user.username:
+                                x[1] += c
+                                z = False
+                                
+                        if z:
+                            pointgrow.append([user.userip,c,user.username])
+                        print "c",c
+
+                    print top3[i][4]
+                    while True:
                     #print user.votedfor
-                    if song in user.votedfor:
-                        user.votedfor.remove(song)
-                        user.numberofpoints += 10
-                    else:
-                        break
+                        z = True
+                        if top3[i][4] in user.votedfor:
+                            user.votedfor.remove(top3[i][4])
+                            user.numberofpoints += 10
+                            for x in pointgrow:
+                                if x[0] == user.userip and x[2] == user.username:
+                                    x[1] += 10
+                                    z = False
+                            if z:    
+                                pointgrow.append([user.userip,10,user.username])
+                            print "z"
+                        else:
+                            break
                     
-            for user in userdb:
-                print user.username, user.numberofpoints
+                i+=1
+                
+            print pointgrow[0],pointgrow[1]
+            for user in pointgrow:
+                push = "POINTGR"+str(user[1])
+                ips.getConnectionForIp(user[0]).sendMessage(push)
+            #TODO:SORT
+                
+            topseven.update(songdb.tolist(songdb.database[0:6]),5000)
+            
+            x = songdb.tolist(songdb.topseven)
+                    
+            global pysend
+            pysend = ""
+            for y in x:
+                a = y.split(' / ')
+                if len(a)==1:
+                    pysend+=' ## ## !#!'
+                else:
+                    pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
+                        
+            pysend = pysend[0:len(pysend)-3]
+                       
+            print pysend
+                
+            rcv.rectsongplayed.fillcolor="BDBDBD"
+            rcv.rectsongplayed.color="A4A4A4"
+            rcv.textsongplayed.color="424242"
             
     def click(self,events):
             
@@ -577,6 +697,21 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 songdb.addSong(interpret,songtitle,0,user.userid)
                 if (songdb.checktopseven(topsevenold)):
                     topseven.update(songdb.tolist(songdb.topseven),5000)
+                    x = songdb.tolist(songdb.topseven)
+                    
+                    global pysend
+                    pysend = ""
+                    for y in x:
+                        a = y.split(' / ')
+                        if len(a)==1:
+                            pysend+=' ## ## !#!'
+                        else:
+                            pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
+                        
+                    pysend = pysend[0:len(pysend)-3]
+                    
+                    #print pysend
+            
                 push = "SONGADD"+interpret+" - "+songtitle
                 ips.getConnectionForIp(receiver).sendMessage(str(push))
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
@@ -597,6 +732,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
                 push = "SONGRE1"+interpret+" - "+songtitle
                 ips.getConnectionForIp(receiver).sendMessage(str(push))
+                rejdb.addSong(interpret,songtitle,0,-1)
                 
             elif eventid == "rej2":
                 print('Abgelehnt (nicht vorh.): '+text)
@@ -608,30 +744,26 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 if userrej.song2.interpret == usersong[0] and userrej.song2.songtitle == usersong[1] and userrej.song2.status == 0:
                     userrej.song2.interpret = 'LE##ER'
                     userrej.song2.songtitle = 'LE##ER'
-                print user
-
+                    
                 push = "SONGRE2"+interpret+" - "+songtitle
                 ips.getConnectionForIp(receiver).sendMessage(str(push))
-
+                rejdb.addSong(interpret,songtitle,0,-1)
             
             elif eventid == "rej3":
                 print('Abgelehnt (unpassend): '+text)
                 usersong = text.split(' / ')
                 userrej = userdb.getUser(usersong[0],usersong[1])
-                print userrej.song1.interpret, userrej.song1.songtitle
-                print userrej.song2.interpret, userrej.song2.songtitle
                 if userrej.song1.interpret == usersong[0] and userrej.song1.songtitle == usersong[1] and userrej.song1.status == 0:
                     userrej.song1.interpret = 'LE##ER'
                     userrej.song1.songtitle = 'LE##ER'
                 if userrej.song2.interpret == usersong[0] and userrej.song2.songtitle == usersong[1] and userrej.song2.status == 0:
                     userrej.song2.interpret = 'LE##ER'
                     userrej.song2.songtitle = 'LE##ER'
-                print userrej.song1.interpret, userrej.song1.songtitle
-                print userrej.song2.interpret, userrej.song2.songtitle
                 
                 push = "SONGRE3"+interpret+" - "+songtitle
                 ips.getConnectionForIp(receiver).sendMessage(str(push))
                 
+                rejdb.addSong(interpret,songtitle,0, -1)
     
     def __init__(self): ##Create one WordsNode for the Text and RectNode to send to a certain Client and set player, canvas,..
         self.player=avg.Player.get()
@@ -665,27 +797,66 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
 
         self.divsongplayed = avg.DivNode(id = "songplayed",pos=(340,170),size=(250,30),parent=self.rootNode)
         self.rectsongplayed = avg.RectNode(size=(250,30),pos=(0,0),parent=self.divsongplayed,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
-        self.textsongplayed =avg.WordsNode(pos=(10,5),parent=self.divsongplayed,color="424242",text="Song wurde gespielt")
+        self.textsongplayed =avg.WordsNode(pos=(10,5),parent=self.divsongplayed,color="424242",text="Top 3 gespielt")
         self.divsongplayed.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click2)
         
-
+        self.timer=avg.WordsNode (pos=(400,250), color="FFFFFF", font="arial", variant="Bold", text="60:00", fontsize=40, parent=self.rootNode)
+        
+        self.divstart = avg.DivNode(id = "start",pos=(340,215),size=(250,30),parent=self.rootNode)
+        self.rectstart = avg.RectNode(size=(250,30),pos=(0,0),parent=self.divstart,color="FF0000",fillcolor="FE2E2E", fillopacity=1)
+        self.textstart =avg.WordsNode(pos=(10,5),parent=self.divstart,color="8A0808",text="Start")
+        self.divstart.setEventHandler(avg.CURSORDOWN, avg.MOUSE, self.clickstart)
+        
         thread.start_new_thread(self.initializeWebSocket, ()) ##start the WebSocket in new Thread        
                       
-    def initializeWebSocket(self):##Starts the WebSocket
         log.startLogging(sys.stdout)##Create a logfile (not necessary)
+        
+    def initializeWebSocket(self):##Starts the WebSocket
         self.factory = WebSocketServerFactory(hostip, debug = False)
         self.factory.protocol = EchoServerProtocol ##assign our Protocol to send/receive Messages
         listenWS(self.factory)
         
         reactor.run(installSignalHandlers=0)##"installSignalHandlers=0" Necessary for Multithreading
+        
+    def countdown(self,m,s):
+            
+        def MsToSecs(m,s):
+            return m*60 + s
 
+        def secsToMs(secs):
+            mins = secs//60
+            secs -= mins*60
+            mins = str(mins)
+            secs = str(secs)
+            return mins,secs
+            
+        seconds = MsToSecs(m,s)
+        while seconds >= 0:
+            (mint,sect)=secsToMs(seconds)
+            if int(mint) == 0 and int(sect) == 0:
+                rcv.rectsongplayed.fillcolor="FE2E2E"
+                rcv.rectsongplayed.color="FF0000"
+                rcv.textsongplayed.color="8A0808" 
+            if int(sect) < 10 and int(mint) < 10:
+                self.timer.text="0"+mint + ":" + "0"+sect
+            elif int(sect) < 10:
+                self.timer.text=mint+":"+"0"+sect
+            elif int(mint) < 10:
+                self.timer.text="0"+mint+":"+sect
+            else:
+                self.timer.text=mint + ":" +sect
+            time.sleep(1)
+            seconds -= 1
+            if seconds ==-1:
+                seconds = 3599
+            
              
-         
 if __name__ == '__main__':
     rcv=libAvgAppWithRect()
     ips=IPStorage()
     songdb = databases.SongDatabase()
     userdb = databases.UserDatabase()
+    rejdb = databases.SongDatabase()
     
     listwindowid = "window"
     requestlist = ListNode(0, [], 2, size=(300, 100), pos=(5, 5), crop=True, elementoutlinecolor="333333", parent=rcv.player.getRootNode())
