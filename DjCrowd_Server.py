@@ -15,15 +15,12 @@ from autobahn.websocket import WebSocketServerFactory, \
                                WebSocketServerProtocol, \
                                listenWS
 
-global hostip, pysend
+global hostip, pysend, pysend2, pyclient
 hostip = "ws://localhost:9034"
 
 ##LISTNODE
 ##TODO:Auslagern
-##TODO:Timer
 ##TODO:Dj kann Lied editieren, wenn er es annimmt (Typos beheben etc)
-##TODO:Checken, ob IP schon Nutzername hat
-##TODO:Keine doppelten IPs, nach connect schauen, ob userip in userdb
                   
 class ListNode(DivNode):
 
@@ -318,6 +315,10 @@ class EchoServerProtocol(WebSocketServerProtocol):
         ips.updateAll("Client with IP "+self.peer.host+" has disconnected")#Update all
         
     def onOpen(self):
+        for user in userdb:
+            if self.peer.host == user.userip:
+                self.sendMessage("USEREXI"+user.username)
+                return 0
         ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
         ips.updateAll("New Client with IP "+self.peer.host+" has joined")
         
@@ -326,6 +327,12 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     
         ##adds user
         
+        #TODO:PYCLIENT IP
+        if (msg[0:10] == 'PYCLIENT: '):
+            msglen = len(msg)
+            global pyclient
+            pyclient = self.peer.host
+            
         if (msg[0:10] == 'USERNAME: '):
             msglen = len(msg)
             usern = msg[10:msglen]
@@ -486,15 +493,20 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
     def sendtopy(self):
         time.sleep(30)  #updates top7 on screen every 30sec
-        print "XXXXWDWQFWEGWE"
-        global pysend
+        #global pysend,pysend2
+        #TODO:PYSEND
+        #ips.getConnectionForIp(pyclient).sendMessaage(pysend)
+        #ips.getConnectionForIp(pyclient).sendMessaage(pysend2)
         print pysend
-        #TODO:Sendtoclient
+        print pysend2
         self.sendtopy()
             
     def clickstart(self,events):
         thread.start_new_thread(self.countdown,(0,2))
         #TODO:send topseven, top3, startsignal
+        #ips.getConnectionForIp(pyclient).sendMessaage(pysend)
+        #ips.getConnectionForIp(pyclient).sendMessaage(pysend2)
+        #ips.getConnectionForIp(pyclient).sendMessaage("START")
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
@@ -594,7 +606,6 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 songdb.addSong(top3[i][0],top3[i][1],0,top3[i][3])
 
                 for user in userdb:
-                    print user.username
                     if top3[i][3] == user.userid:
                         c = top3[i][2] * 10
                         user.numberofpoints += c
@@ -606,9 +617,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                                 
                         if z:
                             pointgrow.append([user.userip,c,user.username])
-                        print "c",c
-
-                    print top3[i][4]
+                        
                     while True:
                     #print user.votedfor
                         z = True
@@ -621,22 +630,34 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                                     z = False
                             if z:    
                                 pointgrow.append([user.userip,10,user.username])
-                            print "z"
                         else:
                             break
                     
                 i+=1
                 
-            print pointgrow[0],pointgrow[1]
             for user in pointgrow:
                 push = "POINTGR"+str(user[1])
                 ips.getConnectionForIp(user[0]).sendMessage(push)
-            #TODO:SORT
-                
+            
+            #sorts users
+            userdb.database = userdb.mergeSortc()
+            global pysend2
+            pysend2 = ""
+            i = 0
+            while i < 3:
+                if i >= userdb.getlen():
+                    pysend2 += ' ## !#!'
+                else:
+                    pysend2 += userdb[i].username+'##'+str(userdb[i].numberofpoints)+'!#!'
+                i+=1
+            pysend2 = pysend2[0:len(pysend2)-3]
+            print pysend2
+            
+            #updates topseven
             topseven.update(songdb.tolist(songdb.database[0:6]),5000)
             
+            #update pysend
             x = songdb.tolist(songdb.topseven)
-                    
             global pysend
             pysend = ""
             for y in x:
@@ -645,11 +666,10 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     pysend+=' ## ## !#!'
                 else:
                     pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
-                        
             pysend = pysend[0:len(pysend)-3]
-                       
             print pysend
-                
+            
+            #changes button color back to grey
             rcv.rectsongplayed.fillcolor="BDBDBD"
             rcv.rectsongplayed.color="A4A4A4"
             rcv.textsongplayed.color="424242"
@@ -868,6 +888,7 @@ if __name__ == '__main__':
     topseven.addEle("4.")
     topseven.addEle("5.")
     topseven.addEle("6.")
-    topseven.addEle("7.")
+    topseven.addEle("7.")      
+    
     
     rcv.player.play()
