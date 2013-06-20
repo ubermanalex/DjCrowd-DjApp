@@ -448,7 +448,6 @@ class EchoServerProtocol(WebSocketServerProtocol):
             
             userdblen = userdb.getlen()
             songdblen = songdb.getlen()
-            
             for i in range(0,userdblen):
                 if (user == userdb[i].username):
                     if (userdb[i].numberofvotes == 0):
@@ -484,9 +483,8 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     break
                 
             #TODO: Neue SongDB an alle Clients schicken
-            
-            topseven.update(songdb.tolist(songdb.topseven),5000)
-            x = songdb.tolist(songdb.topseven)
+            topseven.update(songdb.tolist(),5000)
+            x = songdb.tolist()
             global pysend
             pysend = ""
             for y in x:
@@ -497,6 +495,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
                         
             pysend = pysend[0:len(pysend)-3]
+            
                        
             print pysend
             #print('Interpret: '+str(songdb[0].interpret)+'\n'+
@@ -508,13 +507,13 @@ class EchoServerProtocol(WebSocketServerProtocol):
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
     def sendtopy(self):
-        time.sleep(30)  #updates top7 on screen every 30sec
         #global pysend,pysend2
         #TODO:PYSEND
         #ips.getConnectionForIp(pyclient).sendMessaage(pysend)
         #ips.getConnectionForIp(pyclient).sendMessaage(pysend2)
         print pysend
         print pysend2
+        time.sleep(30)  #updates top7 on screen every 30sec
         self.sendtopy()
             
     def clickstart(self,events):
@@ -665,8 +664,10 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             
             while i < k:
                 songdb.database.remove(songdb[0])
+                
                 songdb.addSong(top3[i][0],top3[i][1],0,top3[i][3])
-
+                
+                
                 for user in userdb:
                     if top3[i][3] == user.userid:
                         c = top3[i][2] * 10
@@ -696,7 +697,6 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                             break
                     
                 i+=1
-                
             for user in pointgrow:
                 push = "POINTGR"+str(user[1])
                 ips.getConnectionForIp(user[0]).sendMessage(push)
@@ -716,10 +716,11 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             print pysend2
             
             #updates topseven
-            topseven.update(songdb.tolist(songdb.database[0:6]),5000)
+            topseven.update(songdb.tolist(),5000)
             
             #update pysend
-            x = songdb.tolist(songdb.topseven)
+            x = songdb.tolist()
+            print "EINS",x, songdb.database
             global pysend
             pysend = ""
             for y in x:
@@ -778,8 +779,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     topsevenold.append(song)
                 songdb.addSong(interpret,songtitle,0,user.userid)
                 if (songdb.checktopseven(topsevenold)):
-                    topseven.update(songdb.tolist(songdb.topseven),5000)
-                    x = songdb.tolist(songdb.topseven)
+                    topseven.update(songdb.tolist(),5000)
+                    x = songdb.tolist()
                     
                     global pysend
                     pysend = ""
@@ -918,7 +919,9 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             if int(mint) == 0 and int(sect) == 0:
                 rcv.rectsongplayed.fillcolor="FE2E2E"
                 rcv.rectsongplayed.color="FF0000"
-                rcv.textsongplayed.color="8A0808" 
+                rcv.textsongplayed.color="8A0808"
+                for user in userdb:
+                    user.numberofvotes = 3 
             if int(sect) < 10 and int(mint) < 10:
                 self.timer.text="0"+mint + ":" + "0"+sect
             elif int(sect) < 10:
@@ -952,5 +955,7 @@ if __name__ == '__main__':
     topseven.addEle("6.")
     topseven.addEle("7.")      
     
+    pysend = " ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## "
+    pysend2 = " ## !#! ## !#! ## "
     
     rcv.player.play()

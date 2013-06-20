@@ -102,15 +102,16 @@ class SongDatabase(object):
                     return True              
         return False
     
-    def tolist (self,songarray):
+    def tolist (self):
         strlist = []
-        i = 1
-        for song in songarray:
-            strlist.append(str(i)+". "+str(song.interpret)+" / "+str(song.songtitle)+" / V:"+str(song.numberofvotes))
-            i+=1
-        while i <= 7:
-            strlist.append(str(i)+". ")
-            i+=1
+        i = 0
+        while i < 7:
+            if i >= len(self.database):
+                strlist.append(str(i+1)+". ")
+                i+=1
+            else:
+                strlist.append(str(i+1)+". "+str(self.database[i].interpret)+" / "+str(self.database[i].songtitle)+" / V:"+str(self.database[i].numberofvotes))
+                i+=1
         return strlist
     
     def getUser(self, interpret, songtitle):
