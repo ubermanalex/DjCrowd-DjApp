@@ -679,7 +679,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                                 z = False
                                 
                         if z:
-                            pointgrow.append([user.userip,c,user.username])
+                            pointgrow.append([user.userip,c,user.username,user.numberofpoints])
                         
                     while True:
                     #print user.votedfor
@@ -690,6 +690,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                             for x in pointgrow:
                                 if x[0] == user.userip and x[2] == user.username:
                                     x[1] += 10
+                                    x[3] += 10
                                     z = False
                             if z:    
                                 pointgrow.append([user.userip,10,user.username,user.numberofpoints])
@@ -936,8 +937,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             seconds -= 1
             if seconds ==-1:
                 seconds = 3599
-            
-             
+                         
 if __name__ == '__main__':
     rcv=libAvgAppWithRect()
     ips=IPStorage()
@@ -959,5 +959,4 @@ if __name__ == '__main__':
     
     pysend = " ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## "
     pysend2 = " ## !#! ## !#! ## "
-    
     rcv.player.play()
