@@ -700,6 +700,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             for user in pointgrow:
                 push = "POINTGR"+str(user[1])
                 ips.getConnectionForIp(user[0]).sendMessage(push)
+                ips.getConnectionForIp(user[0].sendMessage('POINTCO'+str(user.numberofpoints)))
             
             #sorts users
             userdb.database = userdb.mergeSortc()
