@@ -692,7 +692,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                                     x[1] += 10
                                     z = False
                             if z:    
-                                pointgrow.append([user.userip,10,user.username])
+                                pointgrow.append([user.userip,10,user.username,user.numberofpoints])
                         else:
                             break
                     
@@ -700,7 +700,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             for user in pointgrow:
                 push = "POINTGR"+str(user[1])
                 ips.getConnectionForIp(user[0]).sendMessage(push)
-                ips.getConnectionForIp(user[0].sendMessage('POINTCO'+str(user.numberofpoints)))
+                ips.getConnectionForIp(user[0]).sendMessage('POINTCO'+str(user[3]))
             
             #sorts users
             userdb.database = userdb.mergeSortc()
@@ -922,7 +922,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 rcv.rectsongplayed.color="FF0000"
                 rcv.textsongplayed.color="8A0808"
                 for user in userdb:
-                    user.numberofvotes = 3 
+                    user.numberofvotes = 3
+                    ips.getConnectionForIp(user.userip).sendMessage('ACTVOTE'+str(user.numberofvotes))
             if int(sect) < 10 and int(mint) < 10:
                 self.timer.text="0"+mint + ":" + "0"+sect
             elif int(sect) < 10:
