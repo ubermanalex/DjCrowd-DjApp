@@ -318,6 +318,15 @@ class EchoServerProtocol(WebSocketServerProtocol):
         for user in userdb:
             if self.peer.host == user.userip:
                 self.sendMessage("USEREXI"+user.username)
+                self.sendMessage("ACTVOTE"+str(user.numberofvotes))
+                if user.song1.interpret == "LE##ER" and user.song2.interpret == "LE##ER":
+                    x = 2
+                elif user.song1.interpret == "LE##ER" or user.song2.interpret == "LE##ER":
+                    x = 1
+                else:
+                    x = 0
+                self.sendMessage("ACTSUGG"+str(x))
+                self.sendMessage("POINTCO"+str(user.numberofpoints))
                 return 0
         ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
         ips.updateAll("New Client with IP "+self.peer.host+" has joined")
@@ -399,11 +408,18 @@ class EchoServerProtocol(WebSocketServerProtocol):
                         userobj.song1.interpret = interpret
                         userobj.song1.songtitle = songtitle
                         userobj.song1.status = 0
+                        if (userobj.song2.interpret == "LE##ER"):
+                            self.sendMessage('ACTSUGG1')
+                        else:
+                            self.sendMessage('ACTSUGG0')
                     elif (userobj.song2.interpret == "LE##ER"):
                         userobj.song2.interpret = interpret
                         userobj.song2.songtitle = songtitle
                         userobj.song2.status = 0
-                        #print ("CHANGE s2")
+                        if (userobj.song1.interpret == "LE##ER"):
+                            self.sendMessage('ACTSUGG1')
+                        else:
+                            self.sendMessage('ACTSUGG0')
                     else:
                         self.sendMessage('MAXSONG')
                         return 0
@@ -446,6 +462,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     if x:
                         return 0
                     userdb[i].numberofvotes -= 1
+                    self.sendMessage('ACTVOTE'+str(userdb[i].numberofvotes))
                     userdb[i].votedfor.append(interpret+'##'+songtitle)
                     #print ('USERVOTES: '+str(userdb[i].numberofvotes))
                     break
@@ -467,16 +484,15 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     break
                 
             #TODO: Neue SongDB an alle Clients schicken
-                    
+            
             topseven.update(songdb.tolist(songdb.topseven),5000)
             x = songdb.tolist(songdb.topseven)
-                    
             global pysend
             pysend = ""
             for y in x:
                 a = y.split(' / ')
                 if len(a)==1:
-                    pysend+=' ## ## !#!'
+                    pysend+=' ## ##0!#!'
                 else:
                     pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
                         
@@ -511,36 +527,69 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
         thread.start_new_thread(self.sendtopy,())
+            
+    def confirm(self,x):
         
-    def confirm2(self):
-        print "yo"
-        check = raw_input("Zur Bestaetigung DjCrowd eingeben")
-        if check != 'DjCrowd':
-            return 5
-        return 10
-    
-    def confirm(self, check):
-            #check = raw_input("Zum Bestaetigen DjCrowd eingeben:")
-            if check != 500:
-                print "yo"
-                return 0
-            text = requestlist.removEle()
-            newsong = text.split(' / ')
-            interpret = newsong[0]
-            songtitle = newsong[1]
-            user = userdb.getUser(interpret,songtitle)
-            print user.username, "blockiert."
-            user.song1.interpret = "BLO##CKED"
-            user.song1.songtitle = "BLO##CKED"
-            user.song2.interpret = "BLO##CKED"
-            user.song2.songtitle = "BLO##CKED"
+        rcv.rectrej1.fillopacity=0
+        rcv.rectrej1.opacity=0
+        rcv.textrej1.opacity=0
         
+        rcv.rectblockuser.fillopacity=0
+        rcv.rectblockuser.opacity=0
+        rcv.textblockuser.opacity=0
+        #TODO:FARBEN
+        self.divask = avg.DivNode(id = "ask",pos=(30,125),size=(250,150),parent=self.rootNode)
+        self.divyes = avg.DivNode(id = "yes",pos=(30,215),size=(250,150),parent=self.rootNode)
+        self.divno = avg.DivNode(id = "no",pos=(30,260),size=(250,150),parent=self.rootNode)
+        
+        self.rectask = avg.RectNode(size=(250,30),pos=(0,0),parent=self.divask,color="2EFE2E",fillcolor="58FA58", fillopacity=1)
+        self.rectyes = avg.RectNode(size=(250,30),pos=(0,0),parent=self.divyes,color="FE642E",fillcolor="FA8258", fillopacity=1)
+        self.rectno = avg.RectNode(size=(250,30),pos=(0,0),parent=self.divno,color="FE2E2E",fillcolor="FA5858", fillopacity=1)
+        
+        self.textask = avg.WordsNode(pos=(10,5),parent=self.divask,color="088A08",text="Bist Du dir sicher?")
+        self.textyes = avg.WordsNode(pos=(10,5),parent=self.divyes,color="8A2908",text="Ja")
+        self.textno = avg.WordsNode(pos=(10,5),parent=self.divno,color="8A0808",text="Nein")
+            
+        self.divno.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.no)
+        if x == 1:
+            self.divyes.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click3s)
+        if x == 0:
+            self.divyes.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click2s)
             
     def click3(self,events):
+        if (rcv.rectadd.color=="A4A4A4"):
+                return 0
+        self.confirm(1)
+    
+    def no(self,events):
+            rcv.rootNode.removeChild(self.divask)
+            rcv.rootNode.removeChild(self.divno)
+            rcv.rootNode.removeChild(self.divyes)
+
+            rcv.rectrej1.fillopacity=1
+            rcv.rectrej1.opacity=1
+            rcv.textrej1.opacity=1
+        
+            rcv.rectblockuser.fillopacity=1
+            rcv.rectblockuser.opacity=1
+            rcv.textblockuser.opacity=1
+        
+    def click3s(self,events):
+            rcv.rootNode.removeChild(self.divask)
+            rcv.rootNode.removeChild(self.divno)
+            rcv.rootNode.removeChild(self.divyes)
+
+            rcv.rectrej1.fillopacity=1
+            rcv.rectrej1.opacity=1
+            rcv.textrej1.opacity=1
+        
+            rcv.rectblockuser.fillopacity=1
+            rcv.rectblockuser.opacity=1
+            rcv.textblockuser.opacity=1
+        
+            
             #thread.start_new_thread(self.confirm,(500,))
             #return 0
-            if (rcv.rectadd.color=="A4A4A4"):
-                return 0
             text = requestlist.removEle()
             newsong = text.split(' / ')
             interpret = newsong[0]
@@ -557,15 +606,28 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 
         
     def click2(self,events):
-            print songdb.tolist(songdb.topseven)
-                
-            if (rcv.rectsongplayed.color=="A4A4A4"):
+        if (rcv.rectsongplayed.color=="A4A4A4"):
                 return 0
-            if songdb.getlen() == 0:
+        if songdb.getlen() == 0:
                 rcv.rectsongplayed.fillcolor="BDBDBD"
                 rcv.rectsongplayed.color="A4A4A4"
                 rcv.textsongplayed.color="424242"
                 return 0
+        self.confirm(0)
+            
+    def click2s(self,events):
+            rcv.rootNode.removeChild(self.divask)
+            rcv.rootNode.removeChild(self.divno)
+            rcv.rootNode.removeChild(self.divyes)
+
+            rcv.rectrej1.fillopacity=1
+            rcv.rectrej1.opacity=1
+            rcv.textrej1.opacity=1
+        
+            rcv.rectblockuser.fillopacity=1
+            rcv.rectblockuser.opacity=1
+            rcv.textblockuser.opacity=1
+
             #self.x = 0
             #self.x = thread.start_new_thread(self.confirm2,())
             #TODO:Validierung, bei 'Song gespielt'-Klick
@@ -646,7 +708,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             i = 0
             while i < 3:
                 if i >= userdb.getlen():
-                    pysend2 += ' ## !#!'
+                    pysend2 += ' ##0!#!'
                 else:
                     pysend2 += userdb[i].username+'##'+str(userdb[i].numberofpoints)+'!#!'
                 i+=1
@@ -663,7 +725,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             for y in x:
                 a = y.split(' / ')
                 if len(a)==1:
-                    pysend+=' ## ## !#!'
+                    pysend+=' ## ##0!#!'
                 else:
                     pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
             pysend = pysend[0:len(pysend)-3]
@@ -724,7 +786,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     for y in x:
                         a = y.split(' / ')
                         if len(a)==1:
-                            pysend+=' ## ## !#!'
+                            pysend+=' ## ##0!#!'
                         else:
                             pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
                         
