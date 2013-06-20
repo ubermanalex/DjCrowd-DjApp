@@ -9,7 +9,8 @@ class UserDatabase(object):
 
     def __init__(self):
         self.database = []
-
+        self.topthree = self.database[0:2]
+        
     def __getitem__(self, index):
         return self.database[index]
     
@@ -26,6 +27,33 @@ class UserDatabase(object):
                 return user
             if user.song2.songtitle == songtitle and user.song2.interpret == interpret:
                 return user
+            
+    def mergeSortc(self):
+        x = self.mergeSort(self.database)
+        return x
+    
+    def mergeSort(self,toSort):
+        if len(toSort) <= 1:
+            return toSort
+ 
+        mIndex = len(toSort) / 2
+        left = self.mergeSort(toSort[:mIndex])
+        right = self.mergeSort(toSort[mIndex:])
+        
+        result = []
+        while len(left) > 0 and len(right) > 0:
+            if ((left[0]).numberofpoints) < ((right[0]).numberofpoints):  
+                result.append(right.pop(0))
+            else:
+                result.append(left.pop(0))
+        
+        
+        if len(left) > 0:
+            result.extend(self.mergeSort(left))
+        else:
+            result.extend(self.mergeSort(right))
+        return result
+    
         
 class User(object):
     def __init__(self, userid, userip, username, song1, song2, numberofpoints, numberofvotes, votedfor):
@@ -50,7 +78,7 @@ class SongDatabase(object):
 
     def __init__(self):
         self.database = []
-        self.topseven = []
+        self.topseven = self.database[0:6]
         
     def __getitem__(self, index):
         return self.database[index]
