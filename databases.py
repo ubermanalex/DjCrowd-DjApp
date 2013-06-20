@@ -27,6 +27,13 @@ class UserDatabase(object):
                 return user
             if user.song2.songtitle == songtitle and user.song2.interpret == interpret:
                 return user
+        return 0
+    
+    def getUserByName(self,name):
+        for user in self.database:
+            if user.username == name:
+                return user
+        return 0
             
     def mergeSortc(self):
         x = self.mergeSort(self.database)
@@ -118,6 +125,7 @@ class SongDatabase(object):
         for song in self.database:
             if song.songtitle == songtitle and song.interpret == interpret:
                 return song.fromuser
+            
 
 class Song(object):
     def __init__(self, interpret, songtitle, numberofvotes, fromuser):
