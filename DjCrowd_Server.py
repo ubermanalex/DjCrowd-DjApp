@@ -311,7 +311,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
     def onClose(self,wasClean,code,reason):
         print "Client left"
         ips.dropConnection(self.peer.host) ##Drop Connection out of IPStorage when Client disconnects
-        ips.updateAll("Client with IP "+self.peer.host+" has disconnected")#Update all
+        #ips.updateAll("Client with IP "+self.peer.host+" has disconnected")#Update all
         
     def onOpen(self):
         #TODO: makes pyclient final
@@ -334,7 +334,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
                 return 0
                 
         ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
-        ips.updateAll("New Client with IP "+self.peer.host+" has joined")
+        #ips.updateAll("New Client with IP "+self.peer.host+" has joined")
         
     def onMessage(self, msg, binary):
         #print "received:", msg ##print incoming message
@@ -513,10 +513,11 @@ class EchoServerProtocol(WebSocketServerProtocol):
 class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
     def sendtopy(self):
-        #global pysend,pysend2
+        global pysend,pysend2, pyclient
         #TODO:PYSEND
-        #ips.getConnectionForIp(pyclient).sendMessaage(pysend)
-        #ips.getConnectionForIp(pyclient).sendMessaage(pysend2)
+        ips.getConnectionForIp(pyclient).sendMessage(pysend)
+        global pyclient
+        ips.getConnectionForIp(pyclient).sendMessage(pysend2)
         print pysend
         print pysend2
         time.sleep(30)  #updates top7 on screen every 30sec
@@ -525,9 +526,12 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     def clickstart(self,events):
         thread.start_new_thread(self.countdown,(0,2))
         #TODO:send topseven, top3, startsignal
-        #ips.getConnectionForIp(pyclient).sendMessaage(pysend)
-        #ips.getConnectionForIp(pyclient).sendMessaage(pysend2)
-        #ips.getConnectionForIp(pyclient).sendMessaage("START")
+        global pyclient,pysend,pysend2
+        ips.getConnectionForIp(pyclient).sendMessage(pysend)
+        global pyclient
+        ips.getConnectionForIp(pyclient).sendMessage(pysend2)
+        global pyclient
+        ips.getConnectionForIp(pyclient).sendMessage("START")
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
@@ -1028,10 +1032,9 @@ if __name__ == '__main__':
     topseven.addEle("6.")
     topseven.addEle("7.")      
     
-    pysend = " ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## !#! ## ## "
-    pysend2 = " ## !#! ## !#! ## "
+    pysend = " ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0"
+    pysend2 = " ##0!#! ##0!#! ##0"
     pyclient = 0
     
     thread.start_new_thread(rcv.input,())
-    #thread.start_new_thread(rcv.checkips,())
     rcv.player.play()
