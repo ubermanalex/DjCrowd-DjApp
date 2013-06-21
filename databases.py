@@ -121,6 +121,14 @@ class SongDatabase(object):
                 i+=1
         return strlist
     
+    def tostring (self):
+        tostring = ""
+        i = 0
+        while i < len(self.database):
+            tostring += (str(self.database[i].interpret)+'##'+str(self.database[i].songtitle)+'##'+str(self.database[i].numberofvotes)+'!#!')
+            i += 1
+        return tostring[:-3]
+    
     def getUser(self, interpret, songtitle):
         for song in self.database:
             if song.songtitle == songtitle and song.interpret == interpret:

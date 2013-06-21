@@ -531,16 +531,16 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             
     def clickstart(self,events):
         thread.start_new_thread(self.countdown,(0,2))
-        #TODO:send topseven, top3, startsignal
         global pyclient,pysend,pysend2
         x = pyclient
-        ips.getConnectionForIp(x).sendMessage(pysend)
-        ips.getConnectionForIp(x).sendMessage(pysend2)
-        ips.getConnectionForIp(x).sendMessage("START")
+        #TODO:KOMMENTAR AUFHEBEN
+        #ips.getConnectionForIp(x).sendMessage(pysend)
+        #ips.getConnectionForIp(x).sendMessage(pysend2)
+        #ips.getConnectionForIp(x).sendMessage("START")
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
-        thread.start_new_thread(self.sendtopy,())
+        #thread.start_new_thread(self.sendtopy,())
             
     def confirm(self,x):
         
