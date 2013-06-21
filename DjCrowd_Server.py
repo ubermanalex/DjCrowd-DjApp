@@ -20,6 +20,8 @@ hostip = "ws://localhost:9034"
 
 ##LISTNODE
 ##TODO:Auslagern
+##TODO:in Datei speicher, lesen
+##TODO:immer checken, ob pyclient noch connectet ist, wenn er sendet
                   
 class ListNode(DivNode):
 
@@ -329,7 +331,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     x = 0
                 self.sendMessage("ACTSUGG"+str(x))
                 self.sendMessage("POINTCO"+str(user.numberofpoints))
-                self.sendMessage(songdb.tostring())
+                self.sendMessage('SONGDB1'+songdb.tostring())
                 ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
                 ips.updateAll("New Client with IP "+self.peer.host+" has joined")
                 return 0
@@ -358,7 +360,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     return 0
             self.sendMessage('NAMFREE')
             userdb.addUser(userdb.getlen(),self.peer.host,msg[10:msglen],0,3)
-            self.sendMessage(songdb.tostring())
+            self.sendMessage('SONGDB1'+songdb.tostring())
             #userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
             #       'NAME: '+str(userdb[userdb.getlen()-1].username)+'\n'+
             #       'SONG1: '+str(userdb[userdb.getlen()-1].song1.interpret)+" - "+str(userdb[userdb.getlen()-1].song1.songtitle)+
@@ -494,7 +496,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
             #TODO: Neue SongDB an alle Clients schicken
             if (ips.getAllCurrentConnections()):
                 for x in ips.getAllCurrentConnections():
-                    ips.getConnectionForIp(x).sendMessage(songdb.tostring())
+                    ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
                     
             topseven.update(songdb.tolist(),5000)
             x = songdb.tolist()
@@ -743,7 +745,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             
             if (ips.getAllCurrentConnections()):
                 for x in ips.getAllCurrentConnections():
-                    ips.getConnectionForIp(x).sendMessage(songdb.tostring())
+                    ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
             
             #changes button color back to grey
             rcv.rectsongplayed.fillcolor="BDBDBD"
@@ -822,7 +824,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     
                 if (ips.getAllCurrentConnections()):
                     for x in ips.getAllCurrentConnections():
-                        ips.getConnectionForIp(x).sendMessage(songdb.tostring())
+                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
             
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
                 #      'Songtitel: '+str(songdb[songdb.getlen()-1].songtitle)+'\n'+
