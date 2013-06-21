@@ -514,10 +514,9 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
     def sendtopy(self):
         global pysend,pysend2, pyclient
-        #TODO:PYSEND
-        ips.getConnectionForIp(pyclient).sendMessage(pysend)
-        global pyclient
-        ips.getConnectionForIp(pyclient).sendMessage(pysend2)
+        x = pyclient
+        ips.getConnectionForIp(x).sendMessage(pysend)
+        ips.getConnectionForIp(x).sendMessage(pysend2)
         print pysend
         print pysend2
         time.sleep(30)  #updates top7 on screen every 30sec
@@ -527,11 +526,10 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         thread.start_new_thread(self.countdown,(0,2))
         #TODO:send topseven, top3, startsignal
         global pyclient,pysend,pysend2
-        ips.getConnectionForIp(pyclient).sendMessage(pysend)
-        global pyclient
-        ips.getConnectionForIp(pyclient).sendMessage(pysend2)
-        global pyclient
-        ips.getConnectionForIp(pyclient).sendMessage("START")
+        x = pyclient
+        ips.getConnectionForIp(x).sendMessage(pysend)
+        ips.getConnectionForIp(x).sendMessage(pysend2)
+        ips.getConnectionForIp(x).sendMessage("START")
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
@@ -823,12 +821,20 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     if userrej.song1.interpret == usersong[1] and userrej.song1.songtitle == usersong[2] and userrej.song1.status == 0:
                         userrej.song1.interpret = 'LE##ER'
                         userrej.song1.songtitle = 'LE##ER'
+                        if userrej.song2.interpret == 'LE##ER' and userrej.song2.songtitle == 'LE##ER':
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG2')
+                        else:
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG1')
                     if userrej.song2.interpret == usersong[1] and userrej.song2.songtitle == usersong[2] and userrej.song2.status == 0:
                         userrej.song2.interpret = 'LE##ER'
                         userrej.song2.songtitle = 'LE##ER'
+                        if userrej.song1.interpret == 'LE##ER' and userrej.song1.songtitle == 'LE##ER':
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG2')
+                        else:
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG1')
     
-                    push = "SONGRE1"+interpret+" - "+songtitle
-                    ips.getConnectionForIp(receiver).sendMessage(str(push))
+                    #push = "SONGRE1"+interpret+" - "+songtitle
+                    #ips.getConnectionForIp(receiver).sendMessage(str(push))
                 rejdb.addSong(interpret,songtitle,0,-1)
                 
             elif eventid == "rej2":
@@ -839,9 +845,17 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     if userrej.song1.interpret == usersong[1] and userrej.song1.songtitle == usersong[2] and userrej.song1.status == 0:
                         userrej.song1.interpret = 'LE##ER'
                         userrej.song1.songtitle = 'LE##ER'
+                        if userrej.song2.interpret == 'LE##ER' and userrej.song2.songtitle == 'LE##ER':
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG2')
+                        else:
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG1')
                     if userrej.song2.interpret == usersong[1] and userrej.song2.songtitle == usersong[2] and userrej.song2.status == 0:
                         userrej.song2.interpret = 'LE##ER'
                         userrej.song2.songtitle = 'LE##ER'
+                        if userrej.song1.interpret == 'LE##ER' and userrej.song1.songtitle == 'LE##ER':
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG2')
+                        else:
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG1')
                     
                     push = "SONGRE2"+interpret+" - "+songtitle
                     ips.getConnectionForIp(receiver).sendMessage(str(push))
@@ -855,9 +869,17 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     if userrej.song1.interpret == usersong[1] and userrej.song1.songtitle == usersong[2] and userrej.song1.status == 0:
                         userrej.song1.interpret = 'LE##ER'
                         userrej.song1.songtitle = 'LE##ER'
+                        if userrej.song2.interpret == 'LE##ER' and userrej.song2.songtitle == 'LE##ER':
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG2')
+                        else:
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG1')
                     if userrej.song2.interpret == usersong[1] and userrej.song2.songtitle == usersong[2] and userrej.song2.status == 0:
                         userrej.song2.interpret = 'LE##ER'
                         userrej.song2.songtitle = 'LE##ER'
+                        if userrej.song1.interpret == 'LE##ER' and userrej.song1.songtitle == 'LE##ER':
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG2')
+                        else:
+                            ips.getConnectionForIp(userrej.userip).sendMessage('ACTSUGG1')
                 
                     push = "SONGRE3"+interpret+" - "+songtitle
                     ips.getConnectionForIp(receiver).sendMessage(str(push))
@@ -1037,4 +1059,5 @@ if __name__ == '__main__':
     pyclient = 0
     
     thread.start_new_thread(rcv.input,())
+    thread.start_new_thread(rcv.checkips,())
     rcv.player.play()
