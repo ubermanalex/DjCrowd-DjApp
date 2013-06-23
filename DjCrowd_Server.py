@@ -331,9 +331,9 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     x = 0
                 self.sendMessage("ACTSUGG"+str(x))
                 self.sendMessage("POINTCO"+str(user.numberofpoints))
-                self.sendMessage('SONGDB1'+songdb.tostring())
+                self.sendMessage("SONGDB1"+songdb.tostring())
                 ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
-                ips.updateAll("New Client with IP "+self.peer.host+" has joined")
+                #ips.updateAll("New Client with IP "+self.peer.host+" has joined")
                 return 0
                 
         ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
