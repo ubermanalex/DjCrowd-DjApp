@@ -310,10 +310,10 @@ class IPStorage():
 ###WEBSOCKETPROTOCOL USED FOR COMMUNICATION####
 class EchoServerProtocol(WebSocketServerProtocol):
         
-    def onClose(self,wasClean,code,reason):
-        print "Client left"
-        ips.dropConnection(self.peer.host) ##Drop Connection out of IPStorage when Client disconnects
-        #ips.updateAll("Client with IP "+self.peer.host+" has disconnected")#Update all
+#     def onClose(self,wasClean,code,reason):
+#         print "Client left"
+#         ips.dropConnection(self.peer.host) ##Drop Connection out of IPStorage when Client disconnects
+#         ips.updateAll("Client with IP "+self.peer.host+" has disconnected")#Update all
         
     def onOpen(self):
         #TODO: makes pyclient final
@@ -462,7 +462,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
             for i in range(0,userdblen):
                 if (user == userdb[i].username):
                     if (userdb[i].numberofvotes == 0):
-                        self.sendMessage('MAXVOTE')
+                        self.sendMessage('MAXVOTE'+str(rcv.timer.text))
                         return 0
                     x = True
                     for song in songdb:
