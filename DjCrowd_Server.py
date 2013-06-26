@@ -322,6 +322,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
         for user in userdb:
             if self.peer.host == user.userip:
                 self.sendMessage("USEREXI"+user.username)
+                self.sendMessage("SONGDB1"+songdb.tostring())
                 self.sendMessage("ACTVOTE"+str(user.numberofvotes))
                 if user.song1.interpret == "LE##ER" and user.song2.interpret == "LE##ER":
                     x = 2
@@ -331,8 +332,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     x = 0
                 self.sendMessage("ACTSUGG"+str(x))
                 self.sendMessage("POINTCO"+str(user.numberofpoints))
-                self.sendMessage("SONGDB1"+songdb.tostring())
-                ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
+                #ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
                 #ips.updateAll("New Client with IP "+self.peer.host+" has joined")
                 return 0
                 
@@ -360,7 +360,18 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     return 0
             self.sendMessage('NAMFREE')
             userdb.addUser(userdb.getlen(),self.peer.host,msg[10:msglen],0,3)
+            user = userdb.getUserByName(usern)
             self.sendMessage('SONGDB1'+songdb.tostring())
+            self.sendMessage("ACTVOTE"+str(user.numberofvotes))
+            if user.song1.interpret == "LE##ER" and user.song2.interpret == "LE##ER":
+                x = 2
+            elif user.song1.interpret == "LE##ER" or user.song2.interpret == "LE##ER":
+                x = 1
+            else:
+                x = 0
+            self.sendMessage("ACTSUGG"+str(x))
+            self.sendMessage("POINTCO"+str(user.numberofpoints))
+                
             #userstr = ('ID: '+str(userdb[userdb.getlen()-1].userid)+'\n'+
             #       'NAME: '+str(userdb[userdb.getlen()-1].username)+'\n'+
             #       'SONG1: '+str(userdb[userdb.getlen()-1].song1.interpret)+" - "+str(userdb[userdb.getlen()-1].song1.songtitle)+
@@ -853,6 +864,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
     
                     #push = "SONGRE1"+interpret+" - "+songtitle
                     #ips.getConnectionForIp(receiver).sendMessage(str(push))
+                    push = "SONGRE1"+interpret+" - "+songtitle
+                    ips.getConnectionForIp(receiver).sendMessage(str(push))
                 rejdb.addSong(interpret,songtitle,0,-1)
                 
             elif eventid == "rej2":
@@ -1078,5 +1091,5 @@ if __name__ == '__main__':
     pyclient = 0
     
     thread.start_new_thread(rcv.input,())
-    thread.start_new_thread(rcv.checkips,())
+    #thread.start_new_thread(rcv.checkips,())
     rcv.player.play()
