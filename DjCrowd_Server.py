@@ -696,6 +696,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 
                 for user in userdb:
                     print "FROMUSER",top3[i][3]
+                    c = 0
                     if top3[i][3] == -1: #check if fromuser == -1 (means user who suggested this has been blocked)
                         pass
                     else:
@@ -771,8 +772,9 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             #updates pyclient with top7 songs and top3 users
             global pyclient
             x = pyclient
-            ips.getConnectionForIp(x).sendMessage(pysend)
-            ips.getConnectionForIp(x).sendMessage(pysend2)
+            #TODO:uncomment to send to pyclient
+            #ips.getConnectionForIp(x).sendMessage(pysend)
+            #ips.getConnectionForIp(x).sendMessage(pysend2)
         
             #allow sendpermission already
             global sendpermission
