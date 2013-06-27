@@ -7,6 +7,7 @@ import pdb
 import sys,thread
 import time
 from libavg import *
+import libavg.textarea
 #import listnode
 import databases
 from twisted.internet import reactor
@@ -309,11 +310,12 @@ class IPStorage():
 
 ###WEBSOCKETPROTOCOL USED FOR COMMUNICATION####
 class EchoServerProtocol(WebSocketServerProtocol):
-        
-#     def onClose(self,wasClean,code,reason):
-#         print "Client left"
-#         ips.dropConnection(self.peer.host) ##Drop Connection out of IPStorage when Client disconnects
+    
+#    def onClose(self):
+#        print "Client left"
+#        ips.dropConnection(self.peer.host) ##Drop Connection out of IPStorage when Client disconnects
 #         ips.updateAll("Client with IP "+self.peer.host+" has disconnected")#Update all
+
         
     def onOpen(self):
         #TODO: makes pyclient final
@@ -335,6 +337,8 @@ class EchoServerProtocol(WebSocketServerProtocol):
                 
                 #ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
                 #ips.updateAll("New Client with IP "+self.peer.host+" has joined")
+                ips.dropConnection(self.peer.host) ##Drop Connection out of IPStorage when Client disconnects
+                ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
                 return 0
                 
         ips.addNewClient(self.peer.host, self) ##adds current Connection and Client IP to the Storage
@@ -689,6 +693,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                             for x in pointgrow:
                                 if x[0] == user.userip and x[2] == user.username:
                                     x[1] += c
+                                    x[3] += c
                                     z = False
                     
                         if z:
@@ -822,11 +827,15 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     #print pysend
             
                 push = "SONGADD"+interpret+" - "+songtitle
+                print user, user.userip
                 if not(user == 0):
+                    #TODO:FIX
+                    print ips.getConnectionForIp(receiver), receiver
                     ips.getConnectionForIp(receiver).sendMessage(str(push))
                     
                 if (ips.getAllCurrentConnections()):
                     for x in ips.getAllCurrentConnections():
+                        print x
                         ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
             
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
@@ -951,9 +960,19 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         self.textstart =avg.WordsNode(pos=(10,5),parent=self.divstart,color="8A0808",text="Start")
         self.divstart.setEventHandler(avg.CURSORDOWN, avg.MOUSE, self.clickstart)
         
+        #self.divchange = avg.DivNode(pos=(670,100),parent=self.rootNode,size=(100,100))
+        #self.areachange = libavg.textarea.TextArea(parent = self.divchange, focusContext=None, disableMouseFocus=True, id='divchange')
+        #self.areachange.setStyle(font='Arial', fontsize=12, color="FFFFFF")
+        #self.areachange.setText('YOYOYO')
+        #self.divchange.setEventHandler(avg.KEYDOWN, avg.NONE, self.addchar)
+        #self.rectchange = avg.RectNode(parent=self.divchange,fillcolor="FFFFFF",fillopacity=1,size=(50,50),pos=(0,0))
+        
         thread.start_new_thread(self.initializeWebSocket, ()) ##start the WebSocket in new Thread        
                       
         log.startLogging(sys.stdout)##Create a logfile (not necessary)
+        
+    #def addchar(self, event):
+    #    self.areachange.setText("HEH")
         
     def initializeWebSocket(self):##Starts the WebSocket
         self.factory = WebSocketServerFactory(hostip, debug = False)
@@ -983,7 +1002,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 rcv.textsongplayed.color="8A0808"
                 for user in userdb:
                     user.numberofvotes = 3
-                    ips.getConnectionForIp(user.userip).sendMessage('ACTVOTE'+str(user.numberofvotes))
+                    ips.getConnectionForIp(user.userip).sendMessage('ACTVOT3'+str(user.numberofvotes))
             if int(sect) < 10 and int(mint) < 10:
                 self.timer.text="0"+mint + ":" + "0"+sect
             elif int(sect) < 10:
