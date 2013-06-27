@@ -695,15 +695,17 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 
                 
                 for user in userdb:
+                    print "FROMUSER",top3[i][3]
                     if top3[i][3] == -1: #check if fromuser == -1 (means user who suggested this has been blocked)
                         pass
                     else:
+                        print "USERID",user.userid
                         if top3[i][3] == user.userid:
                             c = top3[i][2] * 10 #c = numberofvotes*10
                             user.numberofpoints += c    #add numberofpoints to userpoints
                             z = True
+                            print "POINTGROWTH1",pointgrow
                             for x in pointgrow:
-                                print "POINTGROWTH1",pointgrow
                                 if x[0] == user.userip and x[2] == user.username:   #checks if user already in pointgrow
                                     x[1] += c   #add points to pointgrowth
                                     x[3] += c   #add points to userpoints
