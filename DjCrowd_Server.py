@@ -96,20 +96,7 @@ class ListNode(DivNode):
                 rcv.textrej2.color="8A2908"
                 rcv.textrej3.color="8A0808"
                 rcv.textblockuser.color="8A0808"
-                
-#             elif (int(event.node.id) == 5000):
-#                 if len(songdb.topseven) == 0:
-#                     return 0
-#                 
-#                 event.node.color = "FF0000"
-#                 
-#                 rcv.rectsongplayed.fillcolor="FE2E2E"
-#                 rcv.rectsongplayed.color="FF0000"
-#                 rcv.textsongplayed.color="8A0808"
-#             else:
-#                 rcv.rectsongplayed.fillcolor="BDBDBD"
-#                 rcv.rectsongplayed.color="A4A4A4"
-#                 rcv.textsongplayed.color="424242"
+            
         
         else:
             pass
@@ -540,20 +527,20 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         global pysend,pysend2, pyclient
         x = pyclient
         ips.getConnectionForIp(x).sendMessage(pysend)
-        #ips.getConnectionForIp(x).sendMessage(pysend2)
+#         ips.getConnectionForIp(x).sendMessage(pysend2)
         print pysend
         #print pysend2
         time.sleep(30)  #updates top7 on screen every 30sec
         self.sendtopy()
             
     def clickstart(self,events):
-        thread.start_new_thread(self.countdown,(0,2))
+        thread.start_new_thread(self.countdown,(3,0))
         global pyclient,pysend,pysend2
         x = pyclient
         #TODO:KOMMENTAR AUFHEBEN
-        #ips.getConnectionForIp(x).sendMessage(pysend)
-        #ips.getConnectionForIp(x).sendMessage(pysend2)
-        #ips.getConnectionForIp(x).sendMessage("START")
+        ips.getConnectionForIp(x).sendMessage(pysend)
+        ips.getConnectionForIp(x).sendMessage(pysend2)
+        ips.getConnectionForIp(x).sendMessage("START")
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
@@ -773,8 +760,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             global pyclient
             x = pyclient
             #TODO:uncomment to send to pyclient, PLAYED
-            #ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
-            #ips.getConnectionForIp(x).sendMessage(pysend2)
+            ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
+            ips.getConnectionForIp(x).sendMessage(pysend2)
         
             #allow sendpermission already
             global sendpermission
@@ -1104,7 +1091,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 requestlist.slist[y-1] = str(y)+" / "+interpret+" / "+songtitle
                 print "Aenderte",data[1],"/",data[2],"zu",interpret,"/",songtitle
                 
-    def checkips(self):
+    def checkips(self): #Methode , um ips zu printen, wurde zum Testen verwendet
         print ips._ipList
         time.sleep(2)
         print songdb.tostring()
@@ -1129,8 +1116,8 @@ if __name__ == '__main__':
     topseven.addEle("6.")
     topseven.addEle("7.")      
     
-    pysend = " ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0"
-    pysend2 = " ##0!#! ##0!#! ##0"
+#     pysend = "Citizens##True Romance##7!#!Michael Jackson##Billy Jean##6!#!Blab##BLub##5!#!Honey##Bunny##4!#!Doofie##schmoli##3!#!arg##ARGH##2!#!Pascal##Lessel##1"
+#     pysend2 = "Steffi##300!#!Alex##200!#!Kirstin##100"
     pyclient = 0
     
     thread.start_new_thread(rcv.input,())
