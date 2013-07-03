@@ -772,8 +772,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             #updates pyclient with top7 songs and top3 users
             global pyclient
             x = pyclient
-            #TODO:uncomment to send to pyclient
-            #ips.getConnectionForIp(x).sendMessage(pysend)
+            #TODO:uncomment to send to pyclient, PLAYED
+            #ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
             #ips.getConnectionForIp(x).sendMessage(pysend2)
         
             #allow sendpermission already
@@ -1028,6 +1028,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             (mint,sect)=secsToMs(seconds)
             if int(mint) == 0 and int(sect) == 0:
                 #no sendpermission until top3 played
+                #TODO: pyclient send top3
                 global sendpermission
                 sendpermission = False
                 
