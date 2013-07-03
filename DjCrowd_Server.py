@@ -1120,8 +1120,12 @@ if __name__ == '__main__':
     topseven.addEle("6.")
     topseven.addEle("7.")      
     
-#     pysend = "Citizens##True Romance##7!#!Michael Jackson##Billy Jean##6!#!Blab##BLub##5!#!Honey##Bunny##4!#!Doofie##schmoli##3!#!arg##ARGH##2!#!Pascal##Lessel##1"
-#     pysend2 = "Steffi##300!#!Alex##200!#!Kirstin##100"
+    pysend = "Citizens##true Romance##7!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0"
+    pysend2 = "Kirstin##200!#!Alex##150!#!Steffi##100"
+#     pysend = "Citizens##True Romance##7!#!Michale##Billy Jean##6!#!Blub##blab##5!#!Buble##ARGH##4!#!Royskopp##argh2##3!#!Marcel##Jenny##2!#!visa##mastercard##1"
+#     pysend2 = "Alex##300!#!Steffi##200!#!Norine##100"
+#     pysend = "Citizens##True Romance##7!#!Michale##Billy Jean##6!#!Blub##blab##5!#!Buble##ARGH##4!#!Royskopp##argh2##3!#!Marcel##Jenny##2!#!visa##mastercard##1"
+#     pysend2 = "Alex##0!#!Steffi##200!#!Norine##100"
     pyclient = 0
     
     thread.start_new_thread(rcv.input,())
