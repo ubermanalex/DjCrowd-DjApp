@@ -494,7 +494,9 @@ class EchoServerProtocol(WebSocketServerProtocol):
             #TODO: Neue SongDB an alle Clients schicken
             if (ips.getAllCurrentConnections()):
                 for x in ips.getAllCurrentConnections():
-                    ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+                    #TODO: wegwe
+                    if (x != ips.getConnectionForIp(pyclient)):
+                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
                     
             topseven.update(songdb.tolist(),5000)
             x = songdb.tolist()
@@ -526,7 +528,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             return 0
         global pysend,pysend2, pyclient
         x = pyclient
-        ips.getConnectionForIp(x).sendMessage(pysend)
+        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
 #         ips.getConnectionForIp(x).sendMessage(pysend2)
         print pysend
         #print pysend2
@@ -538,8 +540,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         global pyclient,pysend,pysend2
         x = pyclient
         #TODO:KOMMENTAR AUFHEBEN
-        ips.getConnectionForIp(x).sendMessage(pysend)
-        ips.getConnectionForIp(x).sendMessage(pysend2)
+        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
+        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
         ips.getConnectionForIp(x).sendMessage("START")
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
@@ -761,7 +763,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             x = pyclient
             #TODO:uncomment to send to pyclient, PLAYED
             ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
-            ips.getConnectionForIp(x).sendMessage(pysend2)
+            ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
         
             #allow sendpermission already
             global sendpermission
@@ -770,7 +772,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             #send new songdb to all clients
             if (ips.getAllCurrentConnections()):
                 for x in ips.getAllCurrentConnections():
-                    ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+                    if (x != ips.getConnectionForIp(pyclient)):
+                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
             
             #changes button color back to grey
             rcv.rectsongplayed.fillcolor="BDBDBD"
@@ -853,7 +856,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 if (ips.getAllCurrentConnections()):
                     for x in ips.getAllCurrentConnections():
                         print x
-                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+                        if (x != ips.getConnectionForIp(pyclient)):
+                            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
             
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
                 #      'Songtitel: '+str(songdb[songdb.getlen()-1].songtitle)+'\n'+
