@@ -492,12 +492,16 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     break
                 
             #TODO: Neue SongDB an alle Clients schicken
-            if (ips.getAllCurrentConnections()):
-                for x in ips.getAllCurrentConnections():
-                    #TODO: wegwe
-                    if (x != ips.getConnectionForIp(pyclient)):
-                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
-                    
+            #if (ips.getAllCurrentConnections()):
+            #    for x in ips.getAllCurrentConnections():
+            #        #TODO: wegwe
+            #        if (x != ips.getConnectionForIp(pyclient)):
+            #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+             
+            for (user in userdb):
+                ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
+             
+                   
             topseven.update(songdb.tolist(),5000)
             x = songdb.tolist()
             global pysend
@@ -770,10 +774,13 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             sendpermission = True
             
             #send new songdb to all clients
-            if (ips.getAllCurrentConnections()):
-                for x in ips.getAllCurrentConnections():
-                    if (x != ips.getConnectionForIp(pyclient)):
-                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+            #if (ips.getAllCurrentConnections()):
+            #    for x in ips.getAllCurrentConnections():
+            #        if (x != ips.getConnectionForIp(pyclient)):
+            #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+            
+            for (user in userdb):
+                ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
             
             #changes button color back to grey
             rcv.rectsongplayed.fillcolor="BDBDBD"
@@ -853,11 +860,15 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     print ips.getConnectionForIp(receiver), receiver
                     ips.getConnectionForIp(receiver).sendMessage(str(push))
                     
-                if (ips.getAllCurrentConnections()):
-                    for x in ips.getAllCurrentConnections():
-                        print x
-                        if (x != ips.getConnectionForIp(pyclient)):
-                            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+                #if (ips.getAllCurrentConnections()):
+                #    for x in ips.getAllCurrentConnections():
+                #        print x
+                #        if (x != ips.getConnectionForIp(pyclient)):
+                #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+            
+                for (user in userdb):
+                    ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
+            
             
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
                 #      'Songtitel: '+str(songdb[songdb.getlen()-1].songtitle)+'\n'+
