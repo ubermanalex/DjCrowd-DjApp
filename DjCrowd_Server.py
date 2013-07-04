@@ -3,6 +3,13 @@ Created on 12.06.2013
 
 @author: Alex
 '''
+
+'''
+PYSENDTOGGLE
+einkommentieren für pyclient tests
+auskommentieren für handyapp tests
+'''
+
 import pdb
 import sys,thread
 import time
@@ -492,25 +499,16 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     break
                 
             #TODO: Neue SongDB an alle Clients schicken
-<<<<<<< HEAD
-            if (ips.getAllCurrentConnections()):
-                for x in ips.getAllCurrentConnections():
-                    #TODO: wegwe
-                    if (x != ips.getConnectionForIp(pyclient)):
-                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
-                    
-=======
             #if (ips.getAllCurrentConnections()):
             #    for x in ips.getAllCurrentConnections():
             #        #TODO: wegwe
             #        if (x != ips.getConnectionForIp(pyclient)):
             #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
              
-            for (user in userdb):
+            for user in userdb:
                 ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
              
                    
->>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
             topseven.update(songdb.tolist(),5000)
             x = songdb.tolist()
             global pysend
@@ -525,7 +523,6 @@ class EchoServerProtocol(WebSocketServerProtocol):
             pysend = pysend[0:len(pysend)-3]
             
                        
-            print pysend
             #print('Interpret: '+str(songdb[0].interpret)+'\n'+
             #      'Songtitel: '+str(songdb[0].songtitle)+'\n'+
             #      'Voteanzahl: '+str(songdb[0].numberofvotes)+'\n'+
@@ -541,37 +538,26 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             return 0
         global pysend,pysend2, pyclient
         x = pyclient
-        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
-<<<<<<< HEAD
-        print "ICH SENDE",pysend
-=======
-#         ips.getConnectionForIp(x).sendMessage(pysend2)
+        #TODO:PYSENDTOGGLE
+        #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
         print pysend
->>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
         #print pysend2
         time.sleep(30)  #updates top7 on screen every 30sec
         self.sendtopy()
             
     def clickstart(self,events):
-<<<<<<< HEAD
-        thread.start_new_thread(self.countdown,(0,10))
+        thread.start_new_thread(self.countdown,(0,0))
         global pyclient,pysend,pysend2
         x = pyclient
-        #TODO:KOMMENTAR AUFHEBEN
+        #TODO:PYSENDTOGGLE
         #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
-=======
-        thread.start_new_thread(self.countdown,(3,0))
-        global pyclient,pysend,pysend2
-        x = pyclient
-        #TODO:KOMMENTAR AUFHEBEN
-        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
->>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
-        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
-        ips.getConnectionForIp(x).sendMessage("START")
+        #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
+        #ips.getConnectionForIp(x).sendMessage("START")
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
-        thread.start_new_thread(self.sendtopy,())
+        #TODO:PYSENDTOGGLE
+        #thread.start_new_thread(self.sendtopy,())
             
     def confirm(self,x):
         
@@ -745,16 +731,11 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                                 pointgrow.append([user.userip,10,user.username,user.numberofpoints])
                         else:
                             break
-                print "POINTGROWTH3",pointgrow    
                 i+=1    #add 1 for looping
                 
             for user in pointgrow:  #send every user who got points a message with his pointgrowth and total points
-                print "USERSONG1INT",user.song1.interpret
-                print "USERSONG1SONG",user.song1.songtitle
-                print "USERSONG2INT",user.song2.interpret
-                print "USERSONG2SONG",user.song2.songtitle
-                if (user.song1.interpet=="BLO##CKED"):
-                    print "BLOCKEDCAUGHT";
+                userobj = userdb.getUserByName(user[2])
+                if (userobj.song1.interpret=="BLO##CKED"):
                     continue
                 push = "POINTGR"+str(user[1])
                 ips.getConnectionForIp(user[0]).sendMessage(push)
@@ -772,7 +753,6 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     pysend2 += userdb[i].username+'##'+str(userdb[i].numberofpoints)+'!#!'
                 i+=1
             pysend2 = pysend2[0:len(pysend2)-3]
-            print pysend2
             
             #updates topseven
             topseven.update(songdb.tolist(),5000)
@@ -788,34 +768,27 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 else:
                     pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'
             pysend = pysend[0:len(pysend)-3]
-            print pysend
             
             #updates pyclient with top7 songs and top3 users
             global pyclient
             x = pyclient
             #TODO:uncomment to send to pyclient, PLAYED
-            ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
-            ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
+            #TODO:PYSENDTOGGLE
+            #ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
+            #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
         
             #allow sendpermission already
             global sendpermission
             sendpermission = True
             
             #send new songdb to all clients
-<<<<<<< HEAD
-            if (ips.getAllCurrentConnections()):
-                for x in ips.getAllCurrentConnections():
-                    if (x != ips.getConnectionForIp(pyclient)):
-                        ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
-=======
             #if (ips.getAllCurrentConnections()):
             #    for x in ips.getAllCurrentConnections():
             #        if (x != ips.getConnectionForIp(pyclient)):
             #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
             
-            for (user in userdb):
+            for user in userdb:
                 ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
->>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
             
             #changes button color back to grey
             rcv.rectsongplayed.fillcolor="BDBDBD"
@@ -889,29 +862,19 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     #print pysend
             
                 push = "SONGADD"+interpret+" - "+songtitle
-                print user, user.userip
                 if not(user == 0):
                     #TODO:FIX
-                    print ips.getConnectionForIp(receiver), receiver
                     ips.getConnectionForIp(receiver).sendMessage(str(push))
                     
-<<<<<<< HEAD
-                if (ips.getAllCurrentConnections()):
-                    for x in ips.getAllCurrentConnections():
-                        print x
-                        if (x != ips.getConnectionForIp(pyclient)):
-                            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
-=======
                 #if (ips.getAllCurrentConnections()):
                 #    for x in ips.getAllCurrentConnections():
                 #        print x
                 #        if (x != ips.getConnectionForIp(pyclient)):
                 #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
             
-                for (user in userdb):
+                for user in userdb:
                     ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
             
->>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
             
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
                 #      'Songtitel: '+str(songdb[songdb.getlen()-1].songtitle)+'\n'+
@@ -1115,7 +1078,6 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     usertoblock.song2.interpret = "BLO##CKED"
                     usertoblock.song2.songtitle = "BLO##CKED"
                     usertoblock.numberofpoints = -1000
-                    print "BLOCKED", usertoblock.song1.interpret, usertoblock.song1.songtitle
                     for song in songdb:
                         if song.fromuser == usertoblock.userid:
                             song.fromuser = -1
@@ -1176,11 +1138,7 @@ if __name__ == '__main__':
     topseven.addEle("6.")
     topseven.addEle("7.")      
     
-<<<<<<< HEAD
-    pysend = "Max##Lied##7!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0"
-=======
     pysend = "Citizens##true Romance##7!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0"
->>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
     pysend2 = "Kirstin##200!#!Alex##150!#!Steffi##100"
 #     pysend = "Citizens##True Romance##7!#!Michale##Billy Jean##6!#!Blub##blab##5!#!Buble##ARGH##4!#!Royskopp##argh2##3!#!Marcel##Jenny##2!#!visa##mastercard##1"
 #     pysend2 = "Alex##300!#!Steffi##200!#!Norine##100"
