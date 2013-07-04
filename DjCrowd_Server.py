@@ -492,12 +492,25 @@ class EchoServerProtocol(WebSocketServerProtocol):
                     break
                 
             #TODO: Neue SongDB an alle Clients schicken
+<<<<<<< HEAD
             if (ips.getAllCurrentConnections()):
                 for x in ips.getAllCurrentConnections():
                     #TODO: wegwe
                     if (x != ips.getConnectionForIp(pyclient)):
                         ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
                     
+=======
+            #if (ips.getAllCurrentConnections()):
+            #    for x in ips.getAllCurrentConnections():
+            #        #TODO: wegwe
+            #        if (x != ips.getConnectionForIp(pyclient)):
+            #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+             
+            for (user in userdb):
+                ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
+             
+                   
+>>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
             topseven.update(songdb.tolist(),5000)
             x = songdb.tolist()
             global pysend
@@ -529,17 +542,30 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
         global pysend,pysend2, pyclient
         x = pyclient
         ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
+<<<<<<< HEAD
         print "ICH SENDE",pysend
+=======
+#         ips.getConnectionForIp(x).sendMessage(pysend2)
+        print pysend
+>>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
         #print pysend2
         time.sleep(30)  #updates top7 on screen every 30sec
         self.sendtopy()
             
     def clickstart(self,events):
+<<<<<<< HEAD
         thread.start_new_thread(self.countdown,(0,10))
         global pyclient,pysend,pysend2
         x = pyclient
         #TODO:KOMMENTAR AUFHEBEN
         #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
+=======
+        thread.start_new_thread(self.countdown,(3,0))
+        global pyclient,pysend,pysend2
+        x = pyclient
+        #TODO:KOMMENTAR AUFHEBEN
+        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
+>>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
         ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
         ips.getConnectionForIp(x).sendMessage("START")
         rcv.divstart.removeChild(self.textstart)
@@ -769,10 +795,20 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
             sendpermission = True
             
             #send new songdb to all clients
+<<<<<<< HEAD
             if (ips.getAllCurrentConnections()):
                 for x in ips.getAllCurrentConnections():
                     if (x != ips.getConnectionForIp(pyclient)):
                         ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+=======
+            #if (ips.getAllCurrentConnections()):
+            #    for x in ips.getAllCurrentConnections():
+            #        if (x != ips.getConnectionForIp(pyclient)):
+            #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+            
+            for (user in userdb):
+                ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
+>>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
             
             #changes button color back to grey
             rcv.rectsongplayed.fillcolor="BDBDBD"
@@ -852,11 +888,23 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     print ips.getConnectionForIp(receiver), receiver
                     ips.getConnectionForIp(receiver).sendMessage(str(push))
                     
+<<<<<<< HEAD
                 if (ips.getAllCurrentConnections()):
                     for x in ips.getAllCurrentConnections():
                         print x
                         if (x != ips.getConnectionForIp(pyclient)):
                             ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+=======
+                #if (ips.getAllCurrentConnections()):
+                #    for x in ips.getAllCurrentConnections():
+                #        print x
+                #        if (x != ips.getConnectionForIp(pyclient)):
+                #            ips.getConnectionForIp(x).sendMessage('SONGDB1'+songdb.tostring())
+            
+                for (user in userdb):
+                    ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
+            
+>>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
             
                 #print('Interpret: '+str(songdb[songdb.getlen()-1].interpret)+'\n'+
                 #      'Songtitel: '+str(songdb[songdb.getlen()-1].songtitle)+'\n'+
@@ -1119,7 +1167,11 @@ if __name__ == '__main__':
     topseven.addEle("6.")
     topseven.addEle("7.")      
     
+<<<<<<< HEAD
     pysend = "Max##Lied##7!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0"
+=======
+    pysend = "Citizens##true Romance##7!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0!#! ## ##0"
+>>>>>>> 09a44c6be398707deb7a3de75dd165d34a54cfb5
     pysend2 = "Kirstin##200!#!Alex##150!#!Steffi##100"
 #     pysend = "Citizens##True Romance##7!#!Michale##Billy Jean##6!#!Blub##blab##5!#!Buble##ARGH##4!#!Royskopp##argh2##3!#!Marcel##Jenny##2!#!visa##mastercard##1"
 #     pysend2 = "Alex##300!#!Steffi##200!#!Norine##100"
