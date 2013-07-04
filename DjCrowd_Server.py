@@ -749,6 +749,13 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 i+=1    #add 1 for looping
                 
             for user in pointgrow:  #send every user who got points a message with his pointgrowth and total points
+                print "USERSONG1INT",user.song1.interpret
+                print "USERSONG1SONG",user.song1.songtitle
+                print "USERSONG2INT",user.song2.interpret
+                print "USERSONG2SONG",user.song2.songtitle
+                if (user.song1.interpet=="BLO##CKED"):
+                    print "BLOCKEDCAUGHT";
+                    continue
                 push = "POINTGR"+str(user[1])
                 ips.getConnectionForIp(user[0]).sendMessage(push)
                 ips.getConnectionForIp(user[0]).sendMessage('POINTCO'+str(user[3]))
@@ -1108,10 +1115,12 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     usertoblock.song2.interpret = "BLO##CKED"
                     usertoblock.song2.songtitle = "BLO##CKED"
                     usertoblock.numberofpoints = -1000
+                    print "BLOCKED", usertoblock.song1.interpret, usertoblock.song1.songtitle
                     for song in songdb:
                         if song.fromuser == usertoblock.userid:
                             song.fromuser = -1
                     ips.getConnectionForIp(usertoblock.userip).sendMessage("USERBLC")
+                    ips.getConnectionForIp(usertoblock.userip).sendMessage("POINTCO"+str(usertoblock.numberofpoints))
                     print usertoblock.username,"blockiert"            
                 
                     
