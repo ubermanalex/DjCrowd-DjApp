@@ -1084,7 +1084,8 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                     ips.getConnectionForIp(usertoblock.userip).sendMessage("USERBLC")
                     ips.getConnectionForIp(usertoblock.userip).sendMessage("POINTCO"+str(usertoblock.numberofpoints))
                     print usertoblock.username,"blockiert"            
-                
+					global pyclient
+					ips.getConnectionForIp(pyclient).sendMessage('PYMESG'+pysend2)
                     
             if x[:6] == "change":
                 y = int(x[7:])
