@@ -1198,7 +1198,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                         
                             j -= 1
                             k -= 1
-                            break
+                        break;
                 print "Fuer "+interpret+" - "+songtitle +" gevotet."
                 
                 x = songdb.tolist()
