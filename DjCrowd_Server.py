@@ -1201,6 +1201,17 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                             break
                 print "Fuer "+interpret+" - "+songtitle +" gevotet."
                 
+                x = songdb.tolist()
+                global pysend
+                pysend = ""
+                for y in x:
+                    a = y.split(' / ')
+                    if len(a)==1:
+                        pysend+=' ## ##0!#!'
+                    else:
+                        pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'        
+                pysend = pysend[0:len(pysend)-3]
+                
             if x[:6] == "songdb":
                 songdblen = songdb.getlen()
                 for i in range(0,songdblen):
@@ -1241,6 +1252,18 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 songtitle = raw_input()
                 songdb.addSong(interpret,songtitle,0,-1)
                 print interpret+" - "+songtitle+" hinzugefuegt."
+                
+                x = songdb.tolist()
+                global pysend
+                pysend = ""
+                for y in x:
+                    a = y.split(' / ')
+                    if len(a)==1:
+                        pysend+=' ## ##0!#!'
+                    else:
+                        pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'        
+                pysend = pysend[0:len(pysend)-3]
+                
             
             if x[:5] == "block":
                 usertoblock = userdb.getUserByName(x[6:])
