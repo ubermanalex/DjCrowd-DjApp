@@ -1174,7 +1174,7 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                 print "Du hast folgende Moeglichkeiten:\n\n1.Mit 'change' gefolgt von einem Index eines Songs in der Vorschlagsliste\nkannst du Interpret und Songtitle des entsprechenden Songs bearbeiten.\n\n2. Mit 'block' gefolgt von einem Nutzernamen\nkannst du einen Nutzer blockieren.\n\nAchtung: Beide Operationen sind irreversibel!"
                 
             if x[:9] == "debughelp":
-                print "songdb - Gibt Song-Datenbank aus.\nadds - Fuegt Song hinzu.\nvote - Votet fuer einen Song.\nuserdb - Gibt User-Datenbank aus.\naddu - Fuegt User hinzu.\npoints - Gibt Punkte an User."
+                print "songdb - Gibt Song-Datenbank aus.\nadds - Fuegt Song hinzu.\nvote - Votet fuer einen Song.\nuserdb - Gibt User-Datenbank aus.\naddu - Fuegt User hinzu.\npoints - Gibt Punkte an User.\npysend - Printet pysend\npysend2 - Printet pysend2"
             
             if x[:4] == "vote":
                 print "Fuer welches Lied moechtest du voten?"
@@ -1257,8 +1257,29 @@ class libAvgAppWithRect (AVGApp): ##Main LibAVG App that uses WebSockets
                             song.fromuser = -1
                     ips.getConnectionForIp(usertoblock.userip).sendMessage("USERBLC")
                     ips.getConnectionForIp(usertoblock.userip).sendMessage("POINTCO"+str(usertoblock.numberofpoints))
-                    print usertoblock.username,"blockiert"            
+                    print usertoblock.username,"blockiert"
+                    userdb.database = userdb.mergeSortc()
+                    
+                    global pyclient
+                    pysend2 = ""
+                    i = 0
+                    while i < 3:
+                        if i >= userdb.getlen():
+                            pysend2 += ' ##0!#!'
+                        else:
+                            pysend2 += userdb[i].username+'##'+str(userdb[i].numberofpoints)+'!#!'
+                        i+=1
+                    pysend2 = pysend2[0:len(pysend2)-3]
+                    #PYSENDTOGGLE
+                    #ips.getConnectionForIp(pyclient).sendMessage('PYMESG'+pysend2)
+         
+            if x[:6] == "pysend":
+                global pysend
+                print pysend
                 
+            if x[:7] == "pysend2":
+                global pysend2
+                print pysend2
                     
             if x[:6] == "change":
                 y = int(x[7:])
