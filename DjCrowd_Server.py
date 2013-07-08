@@ -614,17 +614,18 @@ class libAvgAppWithRect (AVGApp):
     def click2(self,events):
         if (rcv.rectsongplayed.color=="A4A4A4"): #checks if dj is allowed to call "top 3 played"
                 return 0
-        if songdb.getlen() == 0: #if songdb is empty, do nothing
-                rcv.rectsongplayed.fillcolor="BDBDBD"
-                rcv.rectsongplayed.color="A4A4A4"
-                rcv.textsongplayed.color="424242"
-                rcv.textsongplayed2.color="424242"
-                rcv.textsongplayed3.color="424242"
-                rcv.textsongplayed4.color="424242"
-                rcv.textsongplayed.text="Top 1"
-                rcv.textsongplayed2.text="Top 2"
-                rcv.textsongplayed3.text="Top 3"
-                return 0
+        #TODO:evtl loeschen
+#        if songdb.getlen() == 0: #if songdb is empty, do nothing
+#                rcv.rectsongplayed.fillcolor="BDBDBD"
+#                rcv.rectsongplayed.color="A4A4A4"
+#                rcv.textsongplayed.color="424242"
+#                rcv.textsongplayed2.color="424242"
+#                rcv.textsongplayed3.color="424242"
+#                rcv.textsongplayed4.color="424242"
+#                rcv.textsongplayed.text="Top 1"
+#                rcv.textsongplayed2.text="Top 2"
+#                rcv.textsongplayed3.text="Top 3"
+#                return 0
         self.confirm(0) #asks dj to confirm his action
             
     #resets top3 songs, gives points to suggesters            
