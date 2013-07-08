@@ -3,6 +3,7 @@ Created on 10 Jun 2013
 
 @author: Alex
 '''
+
 ##USERDATABASE
 
 class UserDatabase(object):
@@ -100,6 +101,7 @@ class SongDatabase(object):
         if len(self.topseven) < 7:
             self.topseven.append(song)
     
+    #checks if topseven changed, returns True if it did
     def checktopseven (self,oldtopseven):
         if len(oldtopseven) != len(self.topseven):
             return True
@@ -109,6 +111,7 @@ class SongDatabase(object):
                     return True              
         return False
     
+    #converts top7 songs to a stringlist
     def tolist (self):
         strlist = []
         i = 0
