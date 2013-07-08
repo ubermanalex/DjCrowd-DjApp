@@ -510,8 +510,8 @@ class libAvgAppWithRect (AVGApp):
         global pysend, pyclient
         x = pyclient
         #TODO:PYSENDTOGGLE
-        #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
-        print "sending to pyclient:",pysend
+        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend)
+        #print "sending to pyclient:",pysend
         time.sleep(30)
         self.sendtopy()
     
@@ -521,14 +521,14 @@ class libAvgAppWithRect (AVGApp):
         global pyclient,pysend,pysend2
         x = pyclient
         #TODO:PYSENDTOGGLE
-        #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend) #sends top7 songs to pyclient
-        #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2) #sends top3 users to pyclient
-        #ips.getConnectionForIp(x).sendMessage("START") #sends start command to pyclient
+        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend) #sends top7 songs to pyclient
+        ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2) #sends top3 users to pyclient
+        ips.getConnectionForIp(x).sendMessage("START") #sends start command to pyclient
         rcv.divstart.removeChild(self.textstart)
         rcv.divstart.removeChild(self.rectstart)
         rcv.rootNode.removeChild(self.divstart)
         #TODO:PYSENDTOGGLE
-        #thread.start_new_thread(self.sendtopy,()) #starts updating pyclient every 30 seconds
+        thread.start_new_thread(self.sendtopy,()) #starts updating pyclient every 30 seconds
     
     #called when dj blocks a user or presses "top 3 played"
     #asks dj to confirm his action
@@ -624,7 +624,6 @@ class libAvgAppWithRect (AVGApp):
                 rcv.textsongplayed.text="Top 1"
                 rcv.textsongplayed2.text="Top 2"
                 rcv.textsongplayed3.text="Top 3"
-                
                 return 0
         self.confirm(0) #asks dj to confirm his action
             
@@ -687,8 +686,8 @@ class libAvgAppWithRect (AVGApp):
             x = pyclient
             #TODO:uncomment to send to pyclient, PLAYED
             #TODO:PYSENDTOGGLE
-            #ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
-            #ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
+            ips.getConnectionForIp(x).sendMessage("PLAYED"+pysend)
+            ips.getConnectionForIp(x).sendMessage('PYMESG'+pysend2)
         
             #allow sendpermission again
             global sendpermission
@@ -949,7 +948,7 @@ class libAvgAppWithRect (AVGApp):
                 global pysend,pysend2, pyclient
                 x = pyclient
                 #TODO:PYSENDTOGGLE
-                #ips.getConnectionForIp(x).sendMessage('FINAL'+pysend)
+                ips.getConnectionForIp(x).sendMessage('FINAL'+pysend)
         
                 rcv.rectsongplayed.fillcolor="FE2E2E"
                 rcv.rectsongplayed.color="FF0000"
@@ -1001,17 +1000,14 @@ class libAvgAppWithRect (AVGApp):
                 
                 
                     for user in userdb:
-                        print "FROMUSER",top3[i][3]
                         c = 0
                         if top3[i][3] == -1: #check if fromuser == -1 (means user who suggested this has been blocked)
                             pass
                         else:
-                            print "USERID",user.userid
                             if top3[i][3] == user.userid:
                                 c = top3[i][2] * 10 #c = numberofvotes*10
                                 user.numberofpoints += c    #add numberofpoints to userpoints
                                 z = True
-                                print "POINTGROWTH1",pointgrow
                                 for x in pointgrow:
                                     if x[0] == user.userip and x[2] == user.username:   #checks if user already in pointgrow
                                         x[1] += c   #add points to pointgrowth
@@ -1022,13 +1018,11 @@ class libAvgAppWithRect (AVGApp):
                                 pointgrow.append([user.userip,c,user.username,user.numberofpoints])
                         
                         while True:
-                        #print user.votedfor
                             z = True
                             if top3[i][4] in user.votedfor: #if user voted for song
                                 user.votedfor.remove(top3[i][4])    #remove song element once from votedfor
                                 user.numberofpoints += 10   #add 10 points to userpoints
                                 for x in pointgrow:
-                                    print "POINTGROWTH2",pointgrow
                                     if x[0] == user.userip and x[2] == user.username: #check if user already in pointgrow
                                         x[1] += 10  #add 10 points to pointgrowth
                                         x[3] += 10  #add 10 points to userpoints
@@ -1157,7 +1151,6 @@ class libAvgAppWithRect (AVGApp):
                 print interpret+" - "+songtitle+" hinzugefuegt."
                 
                 x = songdb.tolist()
-                global pysend
                 pysend = ""
                 for y in x:
                     a = y.split(' / ')
@@ -1198,16 +1191,14 @@ class libAvgAppWithRect (AVGApp):
                         i+=1
                     pysend2 = pysend2[0:len(pysend2)-3]
                     #PYSENDTOGGLE
-                    #ips.getConnectionForIp(pyclient).sendMessage('PYMESG'+pysend2)
+                    ips.getConnectionForIp(pyclient).sendMessage('PYMESG'+pysend2)
          
             #prints pysend
             if x[:6] == "pysend":
-                global pysend
                 print pysend
             
             #prints pysend2
             if x[:7] == "pysend2":
-                global pysend2
                 print pysend2
             
             #allows dj to change a song in requestlist (to correct writing mistakes)
