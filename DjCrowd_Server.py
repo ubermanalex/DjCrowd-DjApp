@@ -1039,6 +1039,8 @@ class libAvgAppWithRect (AVGApp):
                 print "Nach der Bestaetigung werden die Top 3 User aktualisiert wie folgt:"
                 c = 3
                 i = userdb.getlen()
+                if (i > 3):
+                    i = 3
                 pushy = ""
                 while (i > 0):
                     pushy = str(i)+". "+userdb[i-1].username +"\n"+ pushy
@@ -1046,9 +1048,9 @@ class libAvgAppWithRect (AVGApp):
                     c -= 1
                 #fills empty slots (if less than 3 users)
                 while (c > 0):
-                    pushy = pushy + +"\n"+str(4-c)+". "
+                    pushy = pushy +str(4-c)+".\n"
                     c -= 1
-                print pushy
+                print pushy[:-1]
                 print "Sollte einer der Namen anstoessig sein, blockiere den Nutzer mit 'block <username>'."
                 
                 for user in userdb:
