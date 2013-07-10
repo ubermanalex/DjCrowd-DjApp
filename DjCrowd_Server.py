@@ -709,7 +709,7 @@ class libAvgAppWithRect (AVGApp):
             rcv.textsongplayed2.text="Top 2"
             rcv.textsongplayed3.text="Top 3"
     
-    #called when dj clicks on "Vorschlag annehmen", "Doppelt", "Nicht vorhanden" or "Passt nicht"
+    #called when dj clicks on "Annehmen", "Abgelehnt - ..."
     def click(self,events):
             
             if (rcv.rectadd.color=="A4A4A4"): #checks if dj selected a song
@@ -725,7 +725,7 @@ class libAvgAppWithRect (AVGApp):
             else:
                 receiver = user.userip
                 
-            if eventid == "add": #if dj clicked on "Vorschlag annehmen"
+            if eventid == "add": #if dj clicked on "Annehmen"
                 print('Hinzugefuegt: '+text)
                 newsong = text.split(' / ')
                 
@@ -777,7 +777,7 @@ class libAvgAppWithRect (AVGApp):
                 for user in userdb:
                     ips.getConnectionForIp(user.userip).sendMessage('SONGDB1'+songdb.tostring());
             
-            #if dj clicked on "Doppelt"                
+            #if dj clicked on "Ablehnen - doppelt"                
             elif eventid == "rej1":
                 print('Abgelehnt (doppelt): '+text)
                 usersong = text.split(' / ')
@@ -803,9 +803,9 @@ class libAvgAppWithRect (AVGApp):
                     ips.getConnectionForIp(receiver).sendMessage(str(push)) #tell user his song has been rejected because it already is in songdb
                 rejdb.addSong(interpret,songtitle,0,-1) #add song to rejected songs
                 
-            #if dj clicked on "Nicht vorhanden"
+            #if dj clicked on "Ablehnen - hab' ich nicht"
             elif eventid == "rej2":
-                print('Abgelehnt (nicht vorh.): '+text)
+                print("Abgelehnt (hab' ich nicht): "+text)
                 usersong = text.split(' / ')
                 userrej = userdb.getUser(usersong[1],usersong[2])
                 
@@ -829,7 +829,7 @@ class libAvgAppWithRect (AVGApp):
                     ips.getConnectionForIp(receiver).sendMessage(str(push)) #tell user his song has been rejected, because dj doesn't have it
                 rejdb.addSong(interpret,songtitle,0,-1) #add song to rejected songs
             
-            #if dj clicked on "Passt nicht"
+            #if dj clicked on "Ablehnen - passt nicht"
             elif eventid == "rej3":
                 print('Abgelehnt (unpassend): '+text)
                 usersong = text.split(' / ')
@@ -862,32 +862,32 @@ class libAvgAppWithRect (AVGApp):
         self.canvas=self.player.createMainCanvas(size=(620,350))
         self.rootNode=self.canvas.getRootNode()
 
-        #RectNodes for "Vorschlag annehmen", "Doppelt", "Nicht vorhanden", "Passt nicht" and "User blockieren"
+        #RectNodes for "Annehmen", "Ablehnen - ..." and "User blockieren"
         self.rectadd = avg.RectNode(size=(250,30),pos=(30,125),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
         self.rectrej1 = avg.RectNode(size=(250,30),pos=(30,170),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
         self.rectrej2 = avg.RectNode(size=(250,30),pos=(30,215),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
         self.rectrej3 = avg.RectNode(size=(250,30),pos=(30,260),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
         self.rectblockuser = avg.RectNode(size=(250,30),pos=(30,305),parent=self.rootNode,color="A4A4A4",fillcolor="BDBDBD", fillopacity=1)
 
-        #DivNodes for "Vorschlag annehmen", "Doppelt", "Nicht vorhanden", "Passt nicht" and "User blockieren"
+        #DivNodes for "Annehmen", "Ablehnen - ..." and "User blockieren"
         self.divadd = avg.DivNode(id = "add",pos=(30,125),size=(250,30),parent=self.rootNode)
         self.divrej1 = avg.DivNode(id = "rej1",pos=(30,170),size=(250,30),parent=self.rootNode)
         self.divrej2 = avg.DivNode(id = "rej2",pos=(30,215),size=(250,30),parent=self.rootNode)
         self.divrej3 = avg.DivNode(id = "rej3",pos=(30,260),size=(250,30),parent=self.rootNode)
         self.divblockuser = avg.DivNode(id = "blockuser",pos=(30,305),size=(250,30),parent=self.rootNode)
         
-        #EventHandlers for "Vorschlag annehmen", "Doppelt", "Nicht vorhanden", "Passt nicht" and "User blockieren"
+        #EventHandlers for "Annehmen", "Ablehnen - ..." and "User blockieren"
         self.divadd.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej1.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej2.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divrej3.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click)
         self.divblockuser.setEventHandler(avg.CURSORDOWN, avg.MOUSE,  self.click3)
         
-        #WordsNodes for "Vorschlag annehmen", "Doppelt", "Nicht vorhanden", "Passt nicht" and "User blockieren"
-        self.textadd =avg.WordsNode(pos=(10,5),parent=self.divadd,color="424242",text="Vorschlag annehmen")
-        self.textrej1 = avg.WordsNode(pos=(10,5),parent=self.divrej1,color="424242",text="Doppelt")
-        self.textrej2 = avg.WordsNode(pos=(10,5),parent=self.divrej2,color="424242",text="Nicht vorhanden")
-        self.textrej3 = avg.WordsNode(pos=(10,5),parent=self.divrej3,color="424242",text="Passt nicht")
+        #WordsNodes for "Annehmen", "Ablehnen - ..." and "User blockieren"
+        self.textadd =avg.WordsNode(pos=(10,5),parent=self.divadd,color="424242",text="Annehmen")
+        self.textrej1 = avg.WordsNode(pos=(10,5),parent=self.divrej1,color="424242",text="Ablehnen - doppelt")
+        self.textrej2 = avg.WordsNode(pos=(10,5),parent=self.divrej2,color="424242",text="Ablehnen - hab' ich nicht")
+        self.textrej3 = avg.WordsNode(pos=(10,5),parent=self.divrej3,color="424242",text="Ablehnen - passt nicht")
         self.textblockuser = avg.WordsNode(pos=(10,5),parent=self.divblockuser,color="424242",text="User blockieren")
 
         #button "top 3 played"
@@ -1035,6 +1035,14 @@ class libAvgAppWithRect (AVGApp):
                     i+=1    #add 1 for looping
                 userdb.database = userdb.mergeSortc()
             
+                print "Der Countdown ist abgelaufen.\nSpiele nun bitte die Top 3 Crowd-Songs.\nDanach bestaetige, dass du die Songs gespielt hast."
+                print "Nach der Bestaetigung werden die Top 3 User aktualisiert wie folgt:"
+                i = userdb.getlen()
+                while (i > 0):
+                    print i+". "+userdb[i-1].username
+                    i -= 1
+                print "Sollte einer der Namen anstoessig sein, blockiere den Nutzer mit 'block <username>'."
+                
                 for user in userdb:
                     user.numberofvotes = 3
                     ips.getConnectionForIp(user.userip).sendMessage('ACTVOT3'+str(user.numberofvotes))
@@ -1062,7 +1070,15 @@ class libAvgAppWithRect (AVGApp):
             
             #prints console guide for dj
             if x[:4] == "help":
-                print "Du hast folgende Moeglichkeiten:\n\n1.Mit 'change' gefolgt von einem Index eines Songs in der Vorschlagsliste\nkannst du Interpret und Songtitle des entsprechenden Songs bearbeiten.\n\n2. Mit 'block' gefolgt von einem Nutzernamen\nkannst du einen Nutzer blockieren.\n\nAchtung: Beide Operationen sind irreversibel!"
+                print "Du hast folgende Moeglichkeiten:\n\n1. Mit 'change ' gefolgt von einem Index eines Songs in der Vorschlagsliste\nkannst Du Interpret und Songtitle des entsprechenden Songs bearbeiten.\n2. Mit 'block ' gefolgt von einem Nutzernamen\nkannst Du einen Nutzer blockieren.\n(Achtung: Blockierst Du einen Nutzer auf diese Art, werden seine Punkte auf -1000 gesetzt!)\n3. Mit 'songdb' kannst Du Dir\ndie aktuelle Crowd-List anzeigen lassen.\n4. Mit 'userdb' kannst Du Dir\ndie aktuellen Nutzer anzeigen lassen.\n\nAchtung: Die ersten beiden Operationen sind irreversibel!"
+            
+            if x[:4] == "info":
+                print "Auf der linken Seite siehst Du eine Liste der Liedvorschlaege der Clubbesucher."
+                print "Klickst Du ein Liedvorschlag an, so kannst Du diesen bearbeiten."
+                print "Blockierst Du einen User ueber seinen Liedvorschlag, so kann er keine weiteren Lieder mehr vorschlagen."
+                print "\nAuf der rechten Seite siehst Du die sieben Songs mit den meisten Votes."
+                print "Mit Start startest Du den Abend mit DjCrowd. (Der grosse Screen muss laufen!)"
+                print "Ist der Countdown abgelaufen, so bist Du gebeten, die Top 3 Lieder (angezeigt auf dem Button) zu spielen."
             
             #debughelp for developers
             if x[:9] == "debughelp":
@@ -1105,18 +1121,6 @@ class libAvgAppWithRect (AVGApp):
                         pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'        
                 pysend = pysend[0:len(pysend)-3]
                 
-            #prints songdb
-            if x[:6] == "songdb":
-                songdblen = songdb.getlen()
-                for i in range(0,songdblen):
-                    print "Interpret: "+songdb[i].interpret+", Songtitel: "+songdb[i].songtitle+", Votes: "+str(songdb[i].numberofvotes)
-            
-            #prints userdb
-            if x[:6] == "userdb":
-                userdblen = userdb.getlen()
-                for i in range(0,userdblen):
-                    print "User: "+userdb[i].username+", Punkte: "+str(userdb[i].numberofpoints)
-            
             #fakes user addition
             if x[:4] == "addu":
                 print "Welchen User moechtest du hinzufuegen?"
@@ -1160,6 +1164,24 @@ class libAvgAppWithRect (AVGApp):
                     else:
                         pysend += (a[0])[3:len(a[0])]+'##'+(a[1])+'##'+(a[2])[2:len(a[2])]+'!#!'        
                 pysend = pysend[0:len(pysend)-3]
+            
+            
+            #prints songdb
+            if x[:6] == "songdb":
+                songdblen = songdb.getlen()
+                if songdblen == 0:
+                    print "Die Crowd-List ist momentan noch leer."
+                for i in range(0,songdblen):
+                    print "Interpret: "+songdb[i].interpret+", Songtitel: "+songdb[i].songtitle+", Votes: "+str(songdb[i].numberofvotes)
+            
+            #prints userdb
+            if x[:6] == "userdb":
+                userdblen = userdb.getlen()
+                if userdblen == 0:
+                    print "Die Nutzer-Datenbank ist momentan noch leer."
+                for i in range(0,userdblen):
+                    print "User: "+userdb[i].username+", Punkte: "+str(userdb[i].numberofpoints)
+            
                 
             #blocks user followed after whitespace
             if x[:5] == "block":
@@ -1180,7 +1202,7 @@ class libAvgAppWithRect (AVGApp):
                     print usertoblock.username,"blockiert"
                     userdb.database = userdb.mergeSortc() #sorts userdb
                     
-                    #updates and sends pysend2
+                    #updates pysend2
                     global pyclient
                     pysend2 = ""
                     i = 0
@@ -1191,9 +1213,7 @@ class libAvgAppWithRect (AVGApp):
                             pysend2 += userdb[i].username+'##'+str(userdb[i].numberofpoints)+'!#!'
                         i+=1
                     pysend2 = pysend2[0:len(pysend2)-3]
-                    #PYSENDTOGGLE
-                    ips.getConnectionForIp(pyclient).sendMessage('PYMESG'+pysend2)
-         
+                    
             #prints pysend
             if x[:6] == "pysend":
                 print pysend
@@ -1263,5 +1283,9 @@ if __name__ == '__main__':
     
     #starts listening to console
     thread.start_new_thread(rcv.input,())
+    
+    print "Herzlich Willkommen bei DjCrowd!"
+    print "Gib 'help' ein, um eine Uebersicht deiner Befehle zu erhalten."
+    print "Gib 'info' ein, um zusaetzliche Informationen zu DjCrowd zu erhalten."
     
     rcv.player.play()
