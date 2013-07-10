@@ -1037,10 +1037,17 @@ class libAvgAppWithRect (AVGApp):
             
                 print "Der Countdown ist abgelaufen.\nSpiele nun bitte die Top 3 Crowd-Songs.\nDanach bestaetige, dass du die Songs gespielt hast."
                 print "Nach der Bestaetigung werden die Top 3 User aktualisiert wie folgt:"
+                c = 3
                 i = userdb.getlen()
+                pushy = ""
                 while (i > 0):
-                    print i+". "+userdb[i-1].username
+                    pushy = str(i)+". "+userdb[i-1].username + pushy
                     i -= 1
+                    c -= 1
+                #fills empty slots (if less than 3 users)
+                while (c > 0):
+                    pushy = pushy + str(4-c)+". "
+                    c -= 1
                 print "Sollte einer der Namen anstoessig sein, blockiere den Nutzer mit 'block <username>'."
                 
                 for user in userdb:
@@ -1074,7 +1081,7 @@ class libAvgAppWithRect (AVGApp):
             
             if x[:4] == "info":
                 print "Auf der linken Seite siehst Du eine Liste der Liedvorschlaege der Clubbesucher."
-                print "Klickst Du ein Liedvorschlag an, so kannst Du diesen bearbeiten."
+                print "Klickst Du einen Liedvorschlag an, so kannst Du diesen bearbeiten."
                 print "Blockierst Du einen User ueber seinen Liedvorschlag, so kann er keine weiteren Lieder mehr vorschlagen."
                 print "\nAuf der rechten Seite siehst Du die sieben Songs mit den meisten Votes."
                 print "Mit Start startest Du den Abend mit DjCrowd. (Der grosse Screen muss laufen!)"
