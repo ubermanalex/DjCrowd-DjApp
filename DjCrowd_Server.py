@@ -1041,13 +1041,14 @@ class libAvgAppWithRect (AVGApp):
                 i = userdb.getlen()
                 pushy = ""
                 while (i > 0):
-                    pushy = str(i)+". "+userdb[i-1].username + pushy
+                    pushy = str(i)+". "+userdb[i-1].username +"\n"+ pushy
                     i -= 1
                     c -= 1
                 #fills empty slots (if less than 3 users)
                 while (c > 0):
-                    pushy = pushy + str(4-c)+". "
+                    pushy = pushy + +"\n"+str(4-c)+". "
                     c -= 1
+                print pushy
                 print "Sollte einer der Namen anstoessig sein, blockiere den Nutzer mit 'block <username>'."
                 
                 for user in userdb:
